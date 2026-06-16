@@ -1,10 +1,21 @@
 Package: fibroquant
-Title: What the Package Does (One Line, Title Case)
+Title: Quantify Lung Fibrosis in Histological Images
 Version: 0.0.0.9000
 Authors@R: 
-    person("William", "Oldham", , "wm.oldham@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-3029-4866"))
-Description: What the package does (one paragraph).
+    person(
+        given = "William", 
+        family = "Oldham", 
+        email = "wm.oldham@gmail.com", 
+        role = c("aut", "cre"), 
+        comment = c(ORCID = "0000-0003-3029-4866")
+    )
+Description: Provides tools for quantifying the severity of tissue fibrosis
+    from stained histological sections (for example, Masson's trichrome or
+    haematoxylin and eosin). A common image-processing front end feeds
+    interchangeable scoring methods through a shared interface, so that
+    different quantification approaches can be applied and compared. The
+    methods are unsupervised and intended for high-throughput analysis of
+    large image sets with minimal user input.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
