@@ -53,14 +53,12 @@ test_that(".slide_info_table normalises indices and computes um/px per level", {
   expect_equal(s2$um_px, c(0.5, 1.0)) # pixels double in size each level down
 })
 
-# Sys.setenv(FIBROQUANT_TEST_VSI = "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi")
+test_that("fq_slide_info reads a real .vsi (integration)", {
+  skip_if_no_vsi()
 
-test_that("fq_slide_info reads a real .vsi (integration; set FIBROQUANT_TEST_VSI)", {
-  vsi <- Sys.getenv("FIBROQUANT_TEST_VSI")
-  skip_if(vsi == "", "Set FIBROQUANT_TEST_VSI to a .vsi path to run this test.")
-
-  info <- fq_slide_info(vsi)
+  info <- fq_slide_info(vsi_path())
   expect_true(all(c("series", "res", "size_x", "size_y", "um_px") %in% names(info)))
   expect_gt(nrow(info), 0)
   expect_true(all(info$um_px > 0))
 })
+
