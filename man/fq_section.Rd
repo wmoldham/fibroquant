@@ -13,18 +13,26 @@ fq_section(
   section = character(0)
 )
 }
+\arguments{
+\item{rgb}{Pixel data, a height x width x 3 numeric array in \verb{[0, 1]}.}
+
+\item{um_per_px}{Physical scale in microns per pixel; \code{NA} if uncalibrated.}
+
+\item{source}{A list of provenance (path, format, series, resolution, native
+microns/pixel, dims) describing where this image came from.}
+
+\item{mask}{Logical tissue footprint, the same height x width as \code{rgb}; the
+denominator for density and the pixel pool for clustering.}
+
+\item{bbox}{The crop box in parent coordinates, a list with \code{rows} and \code{cols}.}
+
+\item{section}{The section label, e.g. \code{"A"} or \code{"B"}.}
+}
+\value{
+An \code{fq_section} object.
+}
 \description{
 One lung section extracted by \code{\link[=fq_split_sections]{fq_split_sections()}}. Inherits everything from
 \link{fq_slide} and adds the tissue footprint and the crop provenance, so a section
 carries both its pixels and where it sat in the parent scan.
 }
-\section{Additional properties}{
-
-\itemize{
-\item \code{mask}: logical tissue footprint, the same height x width as \code{rgb}; the
-denominator for density and the pixel pool for clustering.
-\item \code{bbox}: the crop box in parent coordinates, a list with \code{rows} and \code{cols}.
-\item \code{section}: the section label, e.g. \code{"A"} or \code{"B"}.
-}
-}
-

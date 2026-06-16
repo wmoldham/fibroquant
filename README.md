@@ -22,11 +22,25 @@ has_vsi <- file.exists(vsi)
 ```
 
 List the file’s image series and resolution levels with their pixel
-dimensions and effective µm/px — the table fq_read_slide() reads to pick
-the scan series and a working resolution:
+dimensions and effective µm/px — the table `fq_read_slide()` reads to
+pick the scan series and a working resolution:
 
 ``` r
 fq_slide_info(vsi)
+#> # A tibble: 24 × 5
+#>    series   res size_x size_y um_px
+#>     <int> <int>  <int>  <int> <dbl>
+#>  1      1     1   8021   9366 0.274
+#>  2      1     2   4011   4683 0.548
+#>  3      1     3   2006   2342 1.09 
+#>  4      1     4   1003   1171 2.19 
+#>  5      1     5    502    586 4.37 
+#>  6      1     6    251    293 8.75 
+#>  7      2     1  18032   9148 0.274
+#>  8      2     2   9016   4574 0.548
+#>  9      2     3   4508   2287 1.10 
+#> 10      2     4   2254   1144 2.19 
+#> # ℹ 14 more rows
 ```
 
 Read the scan series at a working resolution near 4 µm/px:

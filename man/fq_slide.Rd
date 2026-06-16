@@ -6,18 +6,19 @@
 \usage{
 fq_slide(rgb = numeric(0), um_per_px = integer(0), source = list())
 }
+\arguments{
+\item{rgb}{Pixel data, a height x width x 3 numeric array in \verb{[0, 1]}.}
+
+\item{um_per_px}{Physical scale in microns per pixel; \code{NA} if uncalibrated.}
+
+\item{source}{A list of provenance (path, format, series, resolution, native
+microns/pixel, dims) describing where this image came from.}
+}
+\value{
+An \code{fq_slide} object.
+}
 \description{
 The core \code{fibroquant} object: a normalised RGB scan, its physical scale, and
 the provenance needed to reproduce it. Every analyzer consumes an \code{fq_slide}
 (or an \link{fq_section}).
 }
-\section{Properties}{
-
-\itemize{
-\item \code{rgb}: pixel data, a height x width x 3 numeric array in \verb{[0, 1]}.
-\item \code{um_per_px}: physical scale in microns per pixel; \code{NA} if uncalibrated.
-\item \code{source}: a list of provenance (path, format, series, resolution, native
-microns/pixel, dims) describing where this image came from.
-}
-}
-
