@@ -3,10 +3,11 @@
 
 # fibroquant
 
-`fibroquant` quantifies lung fibrosis from Olympus `.vsi` whole-slide
-images (bleomycin mouse model; Masson trichrome and H&E) with no manual
-annotation. It reads a scan, splits the two lung sections side by side
-on each slide, and scores each section by unsupervised color clustering.
+`fibroquant` quantifies lung fibrosis from histology whole-slide images
+without manual annotation. It reads a slide, optionally splits a
+multi-section slide into its separate sections, and scores tissue with a
+choice of unsupervised analyzers: color clustering, collagen
+proportionate area, tissue density, and texture.
 
 ## Reading and splitting a slide
 
@@ -20,7 +21,9 @@ vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
 has_vsi <- file.exists(vsi)
 ```
 
-The series-and-resolution table the file exposes:
+List the file’s image series and resolution levels with their pixel
+dimensions and effective µm/px — the table fq_read_slide() reads to pick
+the scan series and a working resolution:
 
 ``` r
 fq_slide_info(vsi)
