@@ -64,3 +64,52 @@ fq_section <-
       }
     }
   )
+
+# One-line summary of an fq_slide or fq_section, built from its properties so the
+# content can be tested apart from how it is printed.
+.fq_summary <-
+  function(x) {
+    dims <- dim(x@rgb)
+    size <- paste0(dims[1], " × ", dims[2], " px")
+
+    scale <-
+      if (is.na(x@um_per_px)) {
+        "uncalibrated"
+      } else {
+        paste0(signif(x@um_per_px, 3), " µm/px")
+      }
+
+    path <- x@source$path
+    src <-
+      if (is.null(path) || !nzchar(path)) {
+        "unknown source"
+      } else {
+        basename(path)
+      }
+
+    if (S7::S7_inherits(x, fq_section)) {
+      tag <- paste0("<fq_section ", x@section, ">")
+      tissue <- paste0(round(100 * mean(x@mask)), "% tissue")
+      details <- c(size, scale, tissue, src)
+    } else {
+      tag <- "<fq_slide>"
+      details <- c(size, scale, src)
+    }
+
+    joined <-
+      paste(
+        details,
+        collapse = " · "
+      )
+    paste(tag, joined)
+  }
+
+S7::method(print, fq_slide) <-
+  function(x, ...) {
+    cat(
+      .fq_summary(x),
+      "\n",
+      sep = ""
+    )
+    invisible(x)
+  }
