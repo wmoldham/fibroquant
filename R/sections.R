@@ -8,7 +8,7 @@
 #' per section, ordered along the first spatial axis (left to right for a wide
 #' strip).
 #'
-#' @param slide An [fq_slide] from [fq_read_slide()].
+#' @param slide An [fq_slide] from [fq_read()].
 #' @param n Number of sections to keep (largest by area).
 #' @param close_um Morphological closing radius in microns; bridges airspace
 #'   within a section without bridging the gap between sections.

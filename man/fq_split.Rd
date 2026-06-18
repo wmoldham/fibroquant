@@ -7,7 +7,7 @@
 fq_split(slide, n = 2, close_um = 50, min_area_frac = 0.05)
 }
 \arguments{
-\item{slide}{An \link{fq_slide} from \code{\link[=fq_read_slide]{fq_read_slide()}}.}
+\item{slide}{An \link{fq_slide} from \code{\link[=fq_read]{fq_read()}}.}
 
 \item{n}{Number of sections to keep (largest by area).}
 

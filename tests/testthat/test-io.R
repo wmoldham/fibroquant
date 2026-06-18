@@ -103,7 +103,7 @@ test_that(".as_rgb_array returns a height x width x 3 array in [0, 1]", {
   expect_equal(dim(.as_rgb_array(gray)), c(10L, 12L, 3L)) # grayscale -> 3 channels
 })
 
-test_that("fq_read_slide reads a standard raster into an fq_slide", {
+test_that("fq_read reads a standard raster into an fq_slide", {
   arr <-
     array(
       runif(8 * 6 * 3),
@@ -117,7 +117,7 @@ test_that("fq_read_slide reads a standard raster into an fq_slide", {
   path <- withr::local_tempfile(fileext = ".png")
   EBImage::writeImage(img, path)
 
-  s <- fq_read_slide(path)
+  s <- fq_read(path)
   expect_true(S7::S7_inherits(s, fq_slide))
   expect_equal(dim(s@rgb), c(8L, 6L, 3L))
   expect_equal(s@source$format, "ebimage")
@@ -125,10 +125,10 @@ test_that("fq_read_slide reads a standard raster into an fq_slide", {
   expect_true(all(s@rgb >= 0 & s@rgb <= 1))
 })
 
-test_that("fq_read_slide reads a real .vsi (integration)", {
+test_that("fq_read reads a real .vsi (integration)", {
   skip_if_no_vsi()
 
-  s <- fq_read_slide(vsi_path())
+  s <- fq_read(vsi_path())
   expect_true(S7::S7_inherits(s, fq_slide))
   expect_equal(length(dim(s@rgb)), 3L)
   expect_gt(s@um_per_px, 0)

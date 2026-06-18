@@ -19,5 +19,5 @@ Whole-slide formats such as Olympus \code{.vsi} pack several images (a label, a
 tissue overview, the high-resolution scan, a macro), and the scan itself is
 stored as a pyramid of resolution levels. This returns one row per
 (series, level) with its pixel dimensions and effective microns-per-pixel, so
-\code{\link[=fq_read_slide]{fq_read_slide()}} can choose the scan series and a working resolution.
+\code{\link[=fq_read]{fq_read()}} can choose the scan series and a working resolution.
 }

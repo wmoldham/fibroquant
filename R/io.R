@@ -4,7 +4,7 @@
 #' tissue overview, the high-resolution scan, a macro), and the scan itself is
 #' stored as a pyramid of resolution levels. This returns one row per
 #' (series, level) with its pixel dimensions and effective microns-per-pixel, so
-#' [fq_read_slide()] can choose the scan series and a working resolution.
+#' [fq_read()] can choose the scan series and a working resolution.
 #'
 #' @param path Path to a slide file readable by `RBioFormats` (e.g. `.vsi`).
 #' @return A tibble with columns `series`, `res`, `size_x`, `size_y`, `um_px`,
@@ -129,7 +129,7 @@ fq_slide_info <- function(path) {
 #' @param resolution Explicit level; overrides `target_um_px`.
 #' @return An [fq_slide].
 #' @export
-fq_read_slide <- function(
+fq_read <- function(
     path,
     series = NULL,
     target_um_px = 4,
@@ -137,7 +137,7 @@ fq_read_slide <- function(
 ) {
   ext <- tolower(tools::file_ext(path))
   if (ext %in% c("tif", "tiff", "png", "jpg", "jpeg")) {
-    return(.read_slide_ebimage(path))
+    return(.read_ebimage(path))
   }
 
   info <- fq_slide_info(path)
@@ -172,7 +172,7 @@ fq_read_slide <- function(
   )
 }
 
-.read_slide_ebimage <- function(path, um_per_px = NA_real_) {
+.read_ebimage <- function(path, um_per_px = NA_real_) {
   rgb <- .as_rgb_array(EBImage::readImage(path))
 
   fq_slide(

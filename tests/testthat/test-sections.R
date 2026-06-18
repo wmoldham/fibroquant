@@ -58,7 +58,7 @@ test_that("fq_split returns two ordered sections and drops the streak", {
 test_that("fq_split splits a real .vsi into sections (integration)", {
   skip_if_no_vsi()
 
-  sections <- fq_read_slide(vsi_path()) |> fq_split()
+  sections <- fq_read(vsi_path()) |> fq_split()
   expect_true(
     all(vapply(sections, function(s) S7::S7_inherits(s, fq_section), logical(1)))
   )
