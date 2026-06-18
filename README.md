@@ -52,9 +52,10 @@ slide <-
     target_um_px = 4
   )
 slide
+#> <fq_slide> 8777 × 1349 px · 4.38 µm/px · Image_3470.vsi
 ```
 
-Split the two lung sections:
+Optionally, split a multi-section slide into its sections:
 
 ``` r
 sections <-

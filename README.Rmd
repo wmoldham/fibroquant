@@ -42,7 +42,7 @@ fq_slide_info(vsi)
 
 Read the scan series at a working resolution near 4 µm/px:
 
-```{r read, eval = FALSE}
+```{r read, eval = has_vsi}
 slide <-
   fq_read_slide(
     vsi,
@@ -51,7 +51,7 @@ slide <-
 slide
 ```
 
-Split the two lung sections:
+Optionally, split a multi-section slide into its sections:
 
 ```{r split, eval = FALSE}
 sections <-
