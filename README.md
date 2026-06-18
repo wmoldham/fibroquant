@@ -59,10 +59,16 @@ Optionally, split a multi-section slide into its sections:
 
 ``` r
 sections <-
-  fq_split_sections(
+  fq_split(
     slide,
     n = 2
   )
+sections
+#> [[1]]
+#> <fq_section A> 2300 × 1145 px · 4.38 µm/px · 76% tissue · Image_3470.vsi
+#> 
+#> [[2]]
+#> <fq_section B> 2300 × 1143 px · 4.38 µm/px · 77% tissue · Image_3470.vsi
 ```
 
 Visualization and the k-means analyzer slot in below as we build them.

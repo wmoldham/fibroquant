@@ -32,7 +32,7 @@ denominator for density and the pixel pool for clustering.}
 An \code{fq_section} object.
 }
 \description{
-One lung section extracted by \code{\link[=fq_split_sections]{fq_split_sections()}}. Inherits everything from
+One lung section extracted by \code{\link[=fq_split]{fq_split()}}. Inherits everything from
 \link{fq_slide} and adds the tissue footprint and the crop provenance, so a section
 carries both its pixels and where it sat in the parent scan.
 }

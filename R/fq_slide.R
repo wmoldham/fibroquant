@@ -33,7 +33,7 @@ fq_slide <-
 
 #' A single tissue section cropped from a slide
 #'
-#' One lung section extracted by [fq_split_sections()]. Inherits everything from
+#' One lung section extracted by [fq_split()]. Inherits everything from
 #' [fq_slide] and adds the tissue footprint and the crop provenance, so a section
 #' carries both its pixels and where it sat in the parent scan.
 #'

@@ -53,12 +53,13 @@ slide
 
 Optionally, split a multi-section slide into its sections:
 
-```{r split, eval = FALSE}
+```{r split, eval = has_vsi}
 sections <-
-  fq_split_sections(
+  fq_split(
     slide,
     n = 2
   )
+sections
 ```
 
 Visualization and the k-means analyzer slot in below as we build them.
