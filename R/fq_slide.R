@@ -109,3 +109,29 @@ S7::method(print, fq_slide) <- function(x, ...) {
   )
   invisible(x)
 }
+
+#' A collection of tissue sections from one slide
+#'
+#' The return type of [fq_split()]. It extends a list, so it indexes, lengths,
+#' and iterates like one, while carrying its own [plot()] (a contact sheet) and
+#' [print()] methods.
+#'
+#' @param sections A list of [fq_section] objects.
+#' @return An `fq_sections` object.
+#' @export
+fq_sections <-
+  S7::new_class(
+    "fq_sections",
+    parent = S7::class_list,
+    constructor = function(sections = list()) {
+      S7::new_object(sections)
+    }
+  )
+
+S7::method(print, fq_sections) <- function(x, ...) {
+  cat("<fq_sections>", length(x), "section(s)\n")
+  for (section in x) {
+    cat(paste0("  ", .fq_summary(section), "\n"))
+  }
+  invisible(x)
+}

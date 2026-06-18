@@ -18,7 +18,8 @@ within a section without bridging the gap between sections.}
 largest, so debris and scan artifacts are ignored.}
 }
 \value{
-A list of \link{fq_section} objects, ordered left to right.
+An \link{fq_sections} collection (a list of \link{fq_section}s, ordered left to
+right).
 }
 \description{
 Lung slides routinely carry several sections side by side. This finds them by

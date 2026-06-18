@@ -38,8 +38,9 @@ test_that(".rank_components keeps the n largest and orders left to right", {
   expect_equal(.rank_components(flipped, 2, 0.1), c(2L, 1L)) # left first
 })
 
-test_that("fq_split returns two ordered sections and drops the streak", {
+test_that("fq_split returns an ordered fq_sections collection, dropping the streak", {
   sections <- fq_split(fake_two_section_slide(), close_um = 4)
+  expect_true(S7::S7_inherits(sections, fq_sections))
   expect_length(sections, 2)
   expect_equal(
     vapply(sections, function(s) s@section, character(1)),
@@ -48,9 +49,10 @@ test_that("fq_split returns two ordered sections and drops the streak", {
   expect_true(
     all(vapply(sections, function(s) S7::S7_inherits(s, fq_section), logical(1)))
   )
+  expect_output(print(sections), "<fq_sections> 2 section")
 
   a <- sections[[1]]
-  expect_equal(a@bbox$rows, c(10L, 35L)) # left section first
+  expect_equal(a@bbox$rows, c(10L, 35L))
   expect_equal(dim(a@rgb)[1:2], dim(a@mask))
   expect_equal(a@um_per_px, 4)
 })
@@ -59,6 +61,7 @@ test_that("fq_split splits a real .vsi into sections (integration)", {
   skip_if_no_vsi()
 
   sections <- fq_read(vsi_path()) |> fq_split()
+  expect_true(S7::S7_inherits(sections, fq_sections))
   expect_true(
     all(vapply(sections, function(s) S7::S7_inherits(s, fq_section), logical(1)))
   )

@@ -53,7 +53,10 @@ slide <-
   )
 slide
 #> <fq_slide> 8777 × 1349 px · 4.38 µm/px · Image_3470.vsi
+plot(slide)
 ```
+
+<img src="man/figures/README-read-1.png" alt="" width="100%" />
 
 Optionally, split a multi-section slide into its sections:
 
@@ -64,11 +67,9 @@ sections <-
     n = 2
   )
 sections
-#> [[1]]
-#> <fq_section A> 2300 × 1145 px · 4.38 µm/px · 76% tissue · Image_3470.vsi
-#> 
-#> [[2]]
-#> <fq_section B> 2300 × 1143 px · 4.38 µm/px · 77% tissue · Image_3470.vsi
+#> <fq_sections> 2 section(s)
+#>   <fq_section A> 2300 × 1145 px · 4.38 µm/px · 76% tissue · Image_3470.vsi
+#>   <fq_section B> 2300 × 1143 px · 4.38 µm/px · 77% tissue · Image_3470.vsi
 ```
 
 Visualization and the k-means analyzer slot in below as we build them.

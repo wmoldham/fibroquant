@@ -49,6 +49,7 @@ slide <-
     target_um_px = 4
   )
 slide
+plot(slide)
 ```
 
 Optionally, split a multi-section slide into its sections:
@@ -60,6 +61,7 @@ sections <-
     n = 2
   )
 sections
+
 ```
 
 Visualization and the k-means analyzer slot in below as we build them.

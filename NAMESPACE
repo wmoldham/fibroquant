@@ -2,6 +2,7 @@
 
 export(fq_read)
 export(fq_section)
+export(fq_sections)
 export(fq_slide)
 export(fq_slide_info)
 export(fq_split)

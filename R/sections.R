@@ -14,14 +14,13 @@
 #'   within a section without bridging the gap between sections.
 #' @param min_area_frac Drop components smaller than this fraction of the
 #'   largest, so debris and scan artifacts are ignored.
-#' @return A list of [fq_section] objects, ordered left to right.
+#' @return An [fq_sections] collection (a list of [fq_section]s, ordered left to
+#'   right).
 #' @export
-fq_split <- function(
-    slide,
-    n = 2,
-    close_um = 50,
-    min_area_frac = 0.05
-) {
+fq_split <- function(slide,
+                     n = 2,
+                     close_um = 50,
+                     min_area_frac = 0.05) {
   foreground <- .tissue_mask(slide@rgb)
 
   # Close each porous section into a solid blob, then fill alveolar holes; the
@@ -32,8 +31,7 @@ fq_split <- function(
       2L * close_px + 1L,
       shape = "disc"
     )
-  consolidated <-
-    (foreground * 1) |>
+  consolidated <- (foreground * 1) |>
     EBImage::closing(brush) |>
     EBImage::fillHull()
 
@@ -46,10 +44,12 @@ fq_split <- function(
     )
   }
 
-  lapply(
-    seq_along(keep),
-    function(i) .extract_section(slide, labels, keep[i], i)
-  )
+  sections <-
+    lapply(
+      seq_along(keep),
+      function(i) .extract_section(slide, labels, keep[i], i)
+    )
+  fq_sections(sections)
 }
 
 # Labels of the components to keep: the n largest above min_area_frac of the
