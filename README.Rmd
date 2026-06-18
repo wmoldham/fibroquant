@@ -32,15 +32,17 @@ vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
 has_vsi <- file.exists(vsi)
 ```
 
-List the file's image series and resolution levels with their pixel dimensions 
-and effective µm/px — the table `fq_read()` reads to pick the scan series 
-and a working resolution:
+A slide file exposes several image series, each at a handful of resolution
+levels. `fq_slide_info()` lists them with pixel dimensions and effective µm/px —
+the table `fq_read()` consults to pick the scan series and a working resolution:
 
 ```{r info, eval = has_vsi}
 fq_slide_info(vsi)
 ```
 
-Read the scan series at a working resolution near 4 µm/px:
+`fq_read()` returns an `fq_slide`: an RGB array in `[0, 1]` with its physical
+scale and provenance. Printing one reports its dimensions, resolution, and
+source:
 
 ```{r read, eval = has_vsi}
 slide <-
@@ -49,10 +51,11 @@ slide <-
     target_um_px = 4
   )
 slide
-plot(slide)
 ```
 
-Optionally, split a multi-section slide into its sections:
+A slide often carries more than one tissue section. `fq_split()` finds them and
+returns an `fq_sections` collection — a list of `fq_section`s that prints a
+one-line summary per section:
 
 ```{r split, eval = has_vsi}
 sections <-
@@ -61,7 +64,40 @@ sections <-
     n = 2
   )
 sections
-
 ```
 
-Visualization and the k-means analyzer slot in below as we build them.
+## Visualizing
+
+`plot()` dispatches on each object. A slide plots as the whole scan:
+
+```{r plot-slide, eval = has_vsi}
+plot(slide)
+```
+
+Plotting the collection lays the sections out as a contact sheet:
+
+```{r plot-sheet, eval = has_vsi}
+plot(sections)
+```
+
+Handing the sections back to the slide draws each crop rectangle on the parent —
+the quickest check that the split caught every section and skipped streaks and
+debris:
+
+```{r plot-boxes, eval = has_vsi}
+plot(slide, sections = sections)
+```
+
+A single section plots on its own, cropped tight to its tissue:
+
+```{r plot-section, eval = has_vsi}
+plot(sections[[1]])
+```
+
+## Scoring fibrosis
+
+Each section is scored by one or more unsupervised analyzers — color clustering,
+collagen proportionate area, tissue density, and texture. The workflow fits an
+analyzer once on the pooled sections, then reads back a per-section score table
+and a severity map for each section. That layer is the next piece under
+construction; its chunks slot in here as the analyzers land.

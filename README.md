@@ -21,9 +21,10 @@ vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
 has_vsi <- file.exists(vsi)
 ```
 
-List the file’s image series and resolution levels with their pixel
-dimensions and effective µm/px — the table `fq_read()` reads to pick the
-scan series and a working resolution:
+A slide file exposes several image series, each at a handful of
+resolution levels. `fq_slide_info()` lists them with pixel dimensions
+and effective µm/px — the table `fq_read()` consults to pick the scan
+series and a working resolution:
 
 ``` r
 fq_slide_info(vsi)
@@ -43,7 +44,9 @@ fq_slide_info(vsi)
 #> # ℹ 14 more rows
 ```
 
-Read the scan series at a working resolution near 4 µm/px:
+`fq_read()` returns an `fq_slide`: an RGB array in `[0, 1]` with its
+physical scale and provenance. Printing one reports its dimensions,
+resolution, and source:
 
 ``` r
 slide <-
@@ -53,12 +56,11 @@ slide <-
   )
 slide
 #> <fq_slide> 8777 × 1349 px · 4.38 µm/px · Image_3470.vsi
-plot(slide)
 ```
 
-<img src="man/figures/README-read-1.png" alt="" width="100%" />
-
-Optionally, split a multi-section slide into its sections:
+A slide often carries more than one tissue section. `fq_split()` finds
+them and returns an `fq_sections` collection — a list of `fq_section`s
+that prints a one-line summary per section:
 
 ``` r
 sections <-
@@ -72,4 +74,47 @@ sections
 #>   <fq_section B> 2300 × 1143 px · 4.38 µm/px · 77% tissue · Image_3470.vsi
 ```
 
-Visualization and the k-means analyzer slot in below as we build them.
+## Visualizing
+
+`plot()` dispatches on each object. A slide plots as the whole scan:
+
+``` r
+plot(slide)
+```
+
+<img src="man/figures/README-plot-slide-1.png" alt="" width="100%" />
+
+Plotting the collection lays the sections out as a contact sheet:
+
+``` r
+plot(sections)
+```
+
+<img src="man/figures/README-plot-sheet-1.png" alt="" width="100%" />
+
+Handing the sections back to the slide draws each crop rectangle on the
+parent — the quickest check that the split caught every section and
+skipped streaks and debris:
+
+``` r
+plot(slide, sections = sections)
+```
+
+<img src="man/figures/README-plot-boxes-1.png" alt="" width="100%" />
+
+A single section plots on its own, cropped tight to its tissue:
+
+``` r
+plot(sections[[1]])
+```
+
+<img src="man/figures/README-plot-section-1.png" alt="" width="100%" />
+
+## Scoring fibrosis
+
+Each section is scored by one or more unsupervised analyzers — color
+clustering, collagen proportionate area, tissue density, and texture.
+The workflow fits an analyzer once on the pooled sections, then reads
+back a per-section score table and a severity map for each section. That
+layer is the next piece under construction; its chunks slot in here as
+the analyzers land.
