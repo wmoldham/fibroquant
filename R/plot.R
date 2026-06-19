@@ -74,3 +74,27 @@ S7::method(plot, fq_sections) <- function(x, ...) {
   }
   invisible(x)
 }
+
+# Map a severity field to an H x W x 3 RGB array. Each grade takes a viridis
+# colour sampled between positions 0.1 and 0.85; off-tissue pixels are white.
+.pseudocolor <- function(field) {
+  values <- field@values
+  pal <- grDevices::hcl.colors(256, "viridis")
+  pos <- seq(0.1, 0.85, length.out = field@k)
+  grade_rgb <- t(grDevices::col2rgb(pal[round(pos * 255) + 1]) / 255)
+
+  out <- array(1, dim = c(dim(values), 3))
+  tissue <- !is.na(values)
+  g <- as.integer(values[tissue])
+  for (ch in 1:3) {
+    layer <- out[, , ch]
+    layer[tissue] <- grade_rgb[g, ch]
+    out[, , ch] <- layer
+  }
+  out
+}
+
+S7::method(plot, fq_field) <- function(x, ...) {
+  EBImage::display(.fq_image(.pseudocolor(x)), method = "raster")
+  invisible(x)
+}

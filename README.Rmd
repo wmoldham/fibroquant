@@ -185,8 +185,8 @@ fit@luminance # cluster -> rank: mean L*, severity 1..3
 `fq_score` applies the fitted basis to one section and measures area per grade.
 One row: `severity_index` (area-weighted, 0–1) plus `frac_sev_1` … `frac_sev_3`.
 
-```{r kmeans-score, eval = FALSE}
-fq_score(sec, fit)
+```{r kmeans-score, eval = has_vsi}
+fq_score(fit, sec)
 ```
 
 #### 7. The severity map
@@ -196,7 +196,7 @@ object (an H×W field, NA off tissue). Plotting it pseudocolours the grades
 (severe / moderate / healthy → R/G/B); that plot method lands with the plot
 functions.
 
-```{r kmeans-render, eval = FALSE}
-rendered <- fq_render(sec, fit)
+```{r kmeans-render, eval = has_vsi}
+rendered <- fq_render(fit, sec)
 plot(rendered)
 ```

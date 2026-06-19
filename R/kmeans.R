@@ -67,6 +67,22 @@ fq_kmeans_analyzer <-
     )
   )
 
+#' Per-pixel severity field
+#'
+#' The spatial output of [fq_render()]: an H x W grid carrying each tissue
+#' pixel's severity grade (1 to `k`), `NA` off tissue. The plot functions
+#' pseudocolour it.
+#'
+#' @export
+fq_field <-
+  S7::new_class(
+    "fq_field",
+    properties = list(
+      values = S7::class_numeric,
+      k = S7::class_integer
+    )
+  )
+
 # Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
 # pixels; 0 leaves the image unchanged.
 .smooth <- function(rgb, sigma) {
@@ -99,6 +115,21 @@ fq_kmeans_analyzer <-
   out
 }
 
+# Severity grade of each masked tissue pixel: the nearest centre row, which is
+# already in severity order. Returns a grade per pixel in column-major order.
+.assign <- function(section, fit) {
+  spec <- fit@spec
+  lab <- .lab(.smooth(section@rgb, spec@smooth_sigma))
+  x <- .features(lab, section@mask, spec@channels)
+  centers <- fit@centers
+  d <- vapply(
+    seq_len(nrow(centers)),
+    function(g) rowSums(sweep(x, 2, centers[g, ])^2),
+    numeric(nrow(x))
+  )
+  max.col(-d, ties.method = "first")
+}
+
 # Pool masked tissue pixels across sections, k-means on the chosen channels,
 # then order clusters by descending mean L* so centre row i is severity grade i.
 S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
@@ -129,4 +160,25 @@ S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
     centers = km$centers[ord, , drop = FALSE],
     luminance = as.numeric(cluster_lum[ord])
   )
+}
+
+# Per-section metrics: area fraction in each grade, plus an area-weighted
+# severity index on 0 (all mildest) to 10 (all most severe).
+S7::method(fq_score, fq_kmeans_analyzer) <- function(fit, section, ...) {
+  grade <- .assign(section, fit)
+  k <- nrow(fit@centers)
+  frac <- tabulate(grade, nbins = k) / length(grade)
+  cols <- c(
+    list(severity_index = sum(frac * (seq_len(k) - 1) / (k - 1)) * 10),
+    setNames(as.list(frac), paste0("frac_sev_", seq_len(k)))
+  )
+  tibble::as_tibble(cols)
+}
+
+# Per-pixel severity field: each tissue pixel's grade in place, NA off tissue.
+S7::method(fq_render, fq_kmeans_analyzer) <- function(fit, section, ...) {
+  grade <- .assign(section, fit)
+  field <- array(NA_real_, dim = dim(section@mask))
+  field[section@mask] <- grade
+  fq_field(values = field, k = nrow(fit@centers))
 }

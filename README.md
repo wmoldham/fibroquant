@@ -218,12 +218,12 @@ severity ordering; nothing is stored back on the sections.
 ``` r
 fit <- fq_fit(spec, sections)
 fit@centers  # 3 x 2 in a*b* space
-#>          a          b
-#> 1  5.63413  -4.127172
-#> 3 16.19338 -11.294513
-#> 2 36.98934 -21.306984
+#>           a          b
+#> 2  5.634223  -4.127236
+#> 1 16.193490 -11.294584
+#> 3 36.989527 -21.307050
 fit@luminance # cluster -> rank: mean L*, severity 1..3
-#> [1] 91.41834 84.11135 72.75688
+#> [1] 91.41828 84.11127 72.75679
 ```
 
 #### 6. Per-section score
@@ -233,7 +233,11 @@ grade. One row: `severity_index` (area-weighted, 0–1) plus `frac_sev_1`
 … `frac_sev_3`.
 
 ``` r
-fq_score(sec, fit)
+fq_score(fit, sec)
+#> # A tibble: 1 × 4
+#>   severity_index frac_sev_1 frac_sev_2 frac_sev_3
+#>            <dbl>      <dbl>      <dbl>      <dbl>
+#> 1           3.10      0.448      0.484     0.0681
 ```
 
 #### 7. The severity map
@@ -244,6 +248,8 @@ pseudocolours the grades (severe / moderate / healthy → R/G/B); that
 plot method lands with the plot functions.
 
 ``` r
-rendered <- fq_render(sec, fit)
+rendered <- fq_render(fit, sec)
 plot(rendered)
 ```
+
+<img src="man/figures/README-kmeans-render-1.png" alt="" width="100%" />

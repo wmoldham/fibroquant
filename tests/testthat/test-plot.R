@@ -143,3 +143,24 @@ test_that("plot renders an fq_sections contact sheet, returning it invisibly", {
   expect_false(result$visible)
   expect_identical(result$value, sheet)
 })
+
+test_that(".pseudocolor returns an RGB array with white off tissue", {
+  fld <- fq_field(values = matrix(c(1, 2, NA, 3), 2, 2), k = 3L)
+  px <- .pseudocolor(fld)
+
+  expect_equal(dim(px), c(2L, 2L, 3L))
+  expect_true(all(px >= 0 & px <= 1))
+  expect_equal(px[1, 2, ], c(1, 1, 1)) # NA pixel -> white
+})
+
+test_that(".pseudocolor gives each grade a distinct colour", {
+  fld <- fq_field(values = matrix(1:3, 1, 3), k = 3L)
+  px <- .pseudocolor(fld)
+  cols <- rbind(px[1, 1, ], px[1, 2, ], px[1, 3, ])
+  expect_equal(nrow(unique(cols)), 3L)
+})
+
+test_that("plot(fq_field) renders without error", {
+  fld <- fq_field(values = matrix(c(1, 2, NA, 3), 2, 2), k = 3L)
+  with_null_device(expect_no_error(plot(fld)))
+})
