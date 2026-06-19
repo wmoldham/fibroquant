@@ -151,6 +151,11 @@ spec <-
     nstart = 3
   )
 spec
+#> <fibroquant::fq_kmeans>
+#>  @ k           : num 3
+#>  @ channels    : chr [1:2] "a" "b"
+#>  @ smooth_sigma: num 2
+#>  @ nstart      : num 3
 ```
 
 #### 2. Smoothing

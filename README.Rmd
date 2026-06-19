@@ -123,7 +123,7 @@ sec      <- sections[[1]]
 `fq_kmeans()` is just the recipe — how many grades, which colour channels, the
 blur, the number of k-means restarts. It holds no fitted state.
 
-```{r kmeans-spec, eval = FALSE}
+```{r kmeans-spec, eval = has_vsi}
 spec <- 
   fq_kmeans(
     k = 3,
