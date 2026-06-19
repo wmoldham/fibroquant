@@ -29,5 +29,6 @@ Imports:
     methods,
     RBioFormats,
     S7,
+    stats,
     tibble,
     tools

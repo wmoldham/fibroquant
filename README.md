@@ -216,9 +216,14 @@ grade = most fibrotic. The fit carries the cluster centres and that
 severity ordering; nothing is stored back on the sections.
 
 ``` r
-fit <- fq_fit(sections, spec)
+fit <- fq_fit(spec, sections)
 fit@centers  # 3 x 2 in a*b* space
-fit@severity # cluster -> rank: mean L*, severity 1..3
+#>          a          b
+#> 1  5.63413  -4.127172
+#> 3 16.19338 -11.294513
+#> 2 36.98934 -21.306984
+fit@luminance # cluster -> rank: mean L*, severity 1..3
+#> [1] 91.41834 84.11135 72.75688
 ```
 
 #### 6. Per-section score

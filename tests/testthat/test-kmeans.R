@@ -105,3 +105,50 @@ test_that(".features respects channel order and names", {
   expect_true(all(feat[, "b"] == 3))
   expect_true(all(feat[, "L"] == 1))
 })
+
+# A minimal stand-in for fq_section: the kmeans fit only reads @rgb and @mask.
+section_stub <- S7::new_class(
+  "section_stub",
+  properties = list(
+    rgb = S7::class_numeric,
+    mask = S7::class_logical
+  )
+)
+
+test_that("fq_fit on fq_kmeans returns a severity-ordered analyzer", {
+  set.seed(1)
+  rgb <- array(0, dim = c(20, 20, 3))
+  rgb[1:10, , 1] <- 0.6 # light cyan, top half
+  rgb[1:10, , 2] <- 0.9
+  rgb[1:10, , 3] <- 0.9
+  rgb[11:20, , 1] <- 0.4 # dark red, bottom half
+  rgb[11:20, , 2] <- 0.1
+  rgb[11:20, , 3] <- 0.1
+  sec <- section_stub(rgb = rgb, mask = matrix(TRUE, 20, 20))
+
+  fit <- fq_fit(fq_kmeans(k = 2, smooth_sigma = 0), list(sec))
+  expect_true(S7::S7_inherits(fit, fq_kmeans_analyzer))
+  expect_true(S7::S7_inherits(fit, fq_analyzer))
+  expect_equal(dim(fit@centers), c(2L, 2L))
+  expect_equal(length(fit@luminance), 2L)
+  expect_true(all(diff(fit@luminance) <= 0)) # grade 1 brightest, k darkest
+})
+
+test_that("fq_fit on fq_kmeans pools across sections", {
+  set.seed(1)
+  make_section <- function() {
+    rgb <- array(runif(15 * 15 * 3), dim = c(15, 15, 3))
+    section_stub(rgb = rgb, mask = matrix(TRUE, 15, 15))
+  }
+
+  fit <- fq_fit(fq_kmeans(k = 3), list(make_section(), make_section()))
+  expect_equal(dim(fit@centers), c(3L, 2L))
+  expect_true(all(diff(fit@luminance) <= 0))
+})
+
+test_that("fq_fit on fq_kmeans errors with fewer pixels than clusters", {
+  rgb <- array(0.5, dim = c(2, 2, 3))
+  mask <- matrix(c(TRUE, FALSE, FALSE, FALSE), 2, 2) # one tissue pixel
+  sec <- section_stub(rgb = rgb, mask = mask)
+  expect_error(fq_fit(fq_kmeans(k = 3, smooth_sigma = 0), list(sec)))
+})

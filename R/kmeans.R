@@ -49,6 +49,24 @@ fq_kmeans <-
     }
   )
 
+#' Fitted k-means analyzer
+#'
+#' The basis learned by [fq_fit()] from an [fq_kmeans()] spec: cluster centres
+#' reordered into severity grades (row 1 = mildest, row k = most severe) and
+#' each grade's mean lightness. Consumed by [fq_score()] and [fq_render()].
+#'
+#' @export
+fq_kmeans_analyzer <-
+  S7::new_class(
+    "fq_kmeans_analyzer",
+    parent = fq_analyzer,
+    properties = list(
+      spec = fq_kmeans,
+      centers = S7::class_numeric,
+      luminance = S7::class_numeric
+    )
+  )
+
 # Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
 # pixels; 0 leaves the image unchanged.
 .smooth <- function(rgb, sigma) {
@@ -79,4 +97,36 @@ fq_kmeans <-
   out <- flat[as.vector(mask), , drop = FALSE]
   colnames(out) <- channels
   out
+}
+
+# Pool masked tissue pixels across sections, k-means on the chosen channels,
+# then order clusters by descending mean L* so centre row i is severity grade i.
+S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
+  prepped <- lapply(sections, function(s) {
+    lab <- .lab(.smooth(s@rgb, spec@smooth_sigma))
+    list(
+      x = .features(lab, s@mask, spec@channels),
+      lum = .features(lab, s@mask, "L")[, 1]
+    )
+  })
+  x <- do.call(rbind, lapply(prepped, function(p) p$x))
+  lum <- unlist(lapply(prepped, function(p) p$lum))
+
+  k <- as.integer(spec@k)
+  if (nrow(x) < k) {
+    stop(
+      sprintf("Too few tissue pixels (%d) to fit %d clusters.", nrow(x), k),
+      call. = FALSE
+    )
+  }
+
+  km <- stats::kmeans(x, centers = k, nstart = spec@nstart)
+  cluster_lum <- tapply(lum, km$cluster, mean)
+  ord <- order(cluster_lum, decreasing = TRUE)
+
+  fq_kmeans_analyzer(
+    spec = spec,
+    centers = km$centers[ord, , drop = FALSE],
+    luminance = as.numeric(cluster_lum[ord])
+  )
 }

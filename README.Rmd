@@ -174,10 +174,10 @@ the clusters by ascending tissue luminance (`L*`) — darkest grade = most
 fibrotic. The fit carries the cluster centres and that severity ordering;
 nothing is stored back on the sections.
 
-```{r kmeans-fit, eval = FALSE}
-fit <- fq_fit(sections, spec)
+```{r kmeans-fit, eval = has_vsi}
+fit <- fq_fit(spec, sections)
 fit@centers  # 3 x 2 in a*b* space
-fit@severity # cluster -> rank: mean L*, severity 1..3
+fit@luminance # cluster -> rank: mean L*, severity 1..3
 ```
 
 #### 6. Per-section score
