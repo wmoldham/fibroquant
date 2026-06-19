@@ -5,7 +5,7 @@
 demo_spec <- S7::new_class("demo_spec", parent = fq_spec)
 demo_fit <- S7::new_class(
   "demo_fit",
-  parent = fq_result,
+  parent = fq_analyzer,
   properties = list(value = S7::class_numeric)
 )
 
@@ -21,12 +21,12 @@ S7::method(fq_render, demo_fit) <- function(fit, section, ...) {
 
 test_that("abstract specs and fits cannot be constructed", {
   expect_error(fq_spec())
-  expect_error(fq_result())
+  expect_error(fq_analyzer())
 })
 
 test_that("fq_fit dispatches on the spec and returns a fit", {
   fit <- fq_fit(demo_spec(), list(1, 2, 3))
-  expect_true(S7::S7_inherits(fit, fq_result))
+  expect_true(S7::S7_inherits(fit, fq_analyzer))
   expect_true(S7::S7_inherits(fit, demo_fit))
   expect_equal(fit@value, 3)
 })

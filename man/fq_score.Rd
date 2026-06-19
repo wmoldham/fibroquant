@@ -7,7 +7,7 @@
 fq_score(fit, section, ...)
 }
 \arguments{
-\item{fit}{An \link{fq_result} from \code{\link[=fq_fit]{fq_fit()}}.}
+\item{fit}{An \link{fq_analyzer} from \code{\link[=fq_fit]{fq_fit()}}.}
 
 \item{section}{An \code{fq_section}.}
 
@@ -17,6 +17,6 @@ fq_score(fit, section, ...)
 A one-row tibble: \code{severity_index} plus analyzer-specific columns.
 }
 \description{
-Applies a \link[=fq_result]{fit} to one section and returns its per-section
+Applies a \link[=fq_analyzer]{fit} to one section and returns its per-section
 metrics. Dispatches on \code{fit}.
 }

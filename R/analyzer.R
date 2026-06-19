@@ -21,9 +21,9 @@ fq_spec <-
 #' and [fq_render()].
 #'
 #' @export
-fq_result <-
+fq_analyzer <-
   S7::new_class(
-    "fq_result",
+    "fq_analyzer",
     abstract = TRUE
   )
 
@@ -35,7 +35,7 @@ fq_result <-
 #' @param spec An analyzer spec, e.g. `fq_kmeans()`.
 #' @param sections A list of `fq_section`s (or an `fq_sections`).
 #' @param ... Passed on to methods.
-#' @return An [fq_result].
+#' @return An [fq_analyzer].
 #' @export
 fq_fit <-
   S7::new_generic("fq_fit", "spec", function(spec, sections, ...) {
@@ -44,10 +44,10 @@ fq_fit <-
 
 #' Score a section against a fitted analyzer
 #'
-#' Applies a [fit][fq_result] to one section and returns its per-section
+#' Applies a [fit][fq_analyzer] to one section and returns its per-section
 #' metrics. Dispatches on `fit`.
 #'
-#' @param fit An [fq_result] from [fq_fit()].
+#' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.
 #' @param ... Passed on to methods.
 #' @return A one-row tibble: `severity_index` plus analyzer-specific columns.
@@ -59,10 +59,10 @@ fq_score <-
 
 #' Render a section's severity field
 #'
-#' Applies a [fit][fq_result] to one section and returns its per-pixel severity
+#' Applies a [fit][fq_analyzer] to one section and returns its per-pixel severity
 #' field for pseudocolouring. Dispatches on `fit`.
 #'
-#' @param fit An [fq_result] from [fq_fit()].
+#' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.
 #' @param ... Passed on to methods.
 #' @return An H x W severity field, `NA` off tissue.

@@ -14,7 +14,7 @@ fq_fit(spec, sections, ...)
 \item{...}{Passed on to methods.}
 }
 \value{
-An \link{fq_result}.
+An \link{fq_analyzer}.
 }
 \description{
 Fits a \link[=fq_spec]{spec} once on the pooled sections and learns the shared
