@@ -60,3 +60,13 @@ fq_kmeans <-
     sigma = sigma
   )
 }
+
+# Convert sRGB to CIELAB pixelwise; returns an H x W x 3 array of L*, a*, b*.
+.lab <- function(rgb) {
+  flat <- matrix(rgb, ncol = 3)
+  lab <- grDevices::convertColor(flat, from = "sRGB", to = "Lab")
+  array(
+    lab,
+    dim = dim(rgb)
+  )
+}

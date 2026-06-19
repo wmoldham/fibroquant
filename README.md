@@ -178,8 +178,15 @@ EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 ``` r
 lab <- fibroquant:::.lab(sm)
 EBImage::display(EBImage::normalize(lab[, , 2]), method = "raster") # a*
+```
+
+<img src="man/figures/README-kmeans-lab-1.png" alt="" width="100%" />
+
+``` r
 EBImage::display(EBImage::normalize(lab[, , 3]), method = "raster") # b*
 ```
+
+<img src="man/figures/README-kmeans-lab-2.png" alt="" width="100%" />
 
 #### 4. The clustering input
 

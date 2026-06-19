@@ -48,3 +48,23 @@ test_that(".smooth with sigma 0 returns the image unchanged", {
   rgb <- array(runif(10 * 10 * 3), dim = c(10, 10, 3))
   expect_identical(.smooth(rgb, sigma = 0), rgb)
 })
+
+test_that(".lab converts to CIELAB with L*a*b* in channel order", {
+  rgb <- array(0, dim = c(2, 2, 3))
+  rgb[1, 1, ] <- c(1, 1, 1) # white
+  rgb[1, 2, ] <- c(0, 0, 0) # black
+  rgb[2, 1, ] <- c(1, 0, 0) # red
+  rgb[2, 2, ] <- c(0, 0, 1) # blue
+
+  lab <- .lab(rgb)
+  expect_equal(dim(lab), c(2L, 2L, 3L))
+  expect_gt(lab[1, 1, 1], 99) # white L* ~ 100
+  expect_lt(lab[1, 2, 1], 1)  # black L* ~ 0
+  expect_gt(lab[2, 1, 2], 0)  # red has positive a*
+  expect_lt(lab[2, 2, 3], 0)  # blue has negative b*
+})
+
+test_that(".lab preserves non-square image shape", {
+  rgb <- array(runif(3 * 5 * 3), dim = c(3, 5, 3))
+  expect_equal(dim(.lab(rgb)), c(3L, 5L, 3L))
+})

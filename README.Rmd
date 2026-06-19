@@ -149,7 +149,7 @@ EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 `rgb2lab`, then keep `a*` and `b*`: the colour axes, with lightness (`L*`) set
 aside. The two channels are shown below.
 
-```{r kmeans-lab, eval = FALSE}
+```{r kmeans-lab, eval = has_vsi}
 lab <- fibroquant:::.lab(sm)
 EBImage::display(EBImage::normalize(lab[, , 2]), method = "raster") # a*
 EBImage::display(EBImage::normalize(lab[, , 3]), method = "raster") # b*
