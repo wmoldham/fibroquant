@@ -41,8 +41,8 @@ test_that(".physical_um_per_px parses the size, scanning past series without it"
   expect_true(is.na(.physical_um_per_px(missing)))
 })
 
-test_that(".slide_info_table normalises indices and computes um/px per level", {
-  info <- .slide_info_table(fake_meta())
+test_that(".info_table normalises indices and computes um/px per level", {
+  info <- .info_table(fake_meta())
 
   expect_equal(sort(unique(info$series)), c(1L, 2L)) # 0-based -> 1-based
   expect_equal(min(info$res), 1L)
@@ -53,10 +53,10 @@ test_that(".slide_info_table normalises indices and computes um/px per level", {
   expect_equal(s2$um_px, c(0.5, 1.0)) # pixels double in size each level down
 })
 
-test_that("fq_slide_info reads a real .vsi (integration)", {
+test_that("fq_info reads a real .vsi (integration)", {
   skip_if_no_vsi()
 
-  info <- fq_slide_info(vsi_path())
+  info <- fq_info(vsi_path())
   expect_true(all(c("series", "res", "size_x", "size_y", "um_px") %in% names(info)))
   expect_gt(nrow(info), 0)
   expect_true(all(info$um_px > 0))

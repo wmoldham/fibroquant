@@ -22,12 +22,12 @@ has_vsi <- file.exists(vsi)
 ```
 
 A slide file exposes several image series, each at a handful of
-resolution levels. `fq_slide_info()` lists them with pixel dimensions
-and effective µm/px — the table `fq_read()` consults to pick the scan
-series and a working resolution:
+resolution levels. `fq_info()` lists them with pixel dimensions and
+effective µm/px — the table `fq_read()` consults to pick the scan series
+and a working resolution:
 
 ``` r
-fq_slide_info(vsi)
+fq_info(vsi)
 #> # A tibble: 24 × 5
 #>    series   res size_x size_y um_px
 #>     <int> <int>  <int>  <int> <dbl>

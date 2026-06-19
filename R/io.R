@@ -11,13 +11,13 @@
 #'   one row per resolution level. The finest level (`res == 1`) carries the
 #'   native physical pixel size in `um_px`.
 #' @export
-fq_slide_info <- function(path) {
-  .slide_info_table(RBioFormats::read.metadata(path))
+fq_info <- function(path) {
+  .info_table(RBioFormats::read.metadata(path))
 }
 
 # Build the (series, level, dimensions, um/px) table from an RBioFormats
 # metadata list.
-.slide_info_table <- function(meta) {
+.info_table <- function(meta) {
   if (methods::is(meta, "ImageMetadata")) {
     meta <- list(meta)
   }
@@ -140,7 +140,7 @@ fq_read <- function(
     return(.read_ebimage(path))
   }
 
-  info <- fq_slide_info(path)
+  info <- fq_info(path)
   if (is.null(series)) {
     series <- .pick_scan_series(info)
   }
