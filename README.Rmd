@@ -139,7 +139,7 @@ spec
 A Gaussian blur (sigma in pixels) damps single-pixel stain speckle before
 clustering. Same H×W×3 array, slightly softened.
 
-```{r kmeans-smooth, eval = FALSE}
+```{r kmeans-smooth, eval = has_vsi}
 sm <- fibroquant:::.smooth(sec@rgb, sigma = 2)
 EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 ```

@@ -48,3 +48,15 @@ fq_kmeans <-
       NULL
     }
   )
+
+# Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
+# pixels; 0 leaves the image unchanged.
+.smooth <- function(rgb, sigma) {
+  if (sigma <= 0) {
+    return(rgb)
+  }
+  EBImage::gblur(
+    rgb,
+    sigma = sigma
+  )
+}

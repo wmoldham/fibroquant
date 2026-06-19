@@ -168,6 +168,8 @@ sm <- fibroquant:::.smooth(sec@rgb, sigma = 2)
 EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 ```
 
+<img src="man/figures/README-kmeans-smooth-1.png" alt="" width="100%" />
+
 #### 3. CIELAB — a and b channels
 
 `rgb2lab`, then keep `a*` and `b*`: the colour axes, with lightness
