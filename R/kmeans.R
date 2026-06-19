@@ -70,3 +70,13 @@ fq_kmeans <-
     dim = dim(rgb)
   )
 }
+
+# Select the chosen CIELAB channels at masked tissue pixels into an N x m
+# matrix: rows are tissue pixels, columns are the requested channels.
+.features <- function(lab, mask, channels) {
+  idx <- match(channels, c("L", "a", "b"))
+  flat <- matrix(lab[, , idx], ncol = length(idx))
+  out <- flat[as.vector(mask), , drop = FALSE]
+  colnames(out) <- channels
+  out
+}

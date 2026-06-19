@@ -68,3 +68,40 @@ test_that(".lab preserves non-square image shape", {
   rgb <- array(runif(3 * 5 * 3), dim = c(3, 5, 3))
   expect_equal(dim(.lab(rgb)), c(3L, 5L, 3L))
 })
+
+test_that(".features selects channels at masked pixels", {
+  lab <- array(0, dim = c(2, 3, 3))
+  lab[, , 1] <- 1 # L*
+  lab[, , 2] <- 2 # a*
+  lab[, , 3] <- 3 # b*
+  mask <- matrix(c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE), nrow = 2)
+
+  feat <- .features(lab, mask, channels = c("a", "b"))
+  expect_equal(dim(feat), c(sum(mask), 2L))
+  expect_equal(colnames(feat), c("a", "b"))
+  expect_true(all(feat[, "a"] == 2))
+  expect_true(all(feat[, "b"] == 3))
+})
+
+test_that(".features pulls the correct masked pixels in order", {
+  lab <- array(0, dim = c(2, 2, 3))
+  lab[, , 2] <- matrix(c(11, 21, 12, 22), nrow = 2) # a* coded by position
+
+  mask <- matrix(c(TRUE, FALSE, FALSE, TRUE), nrow = 2)
+  feat <- .features(lab, mask, channels = "a")
+  expect_equal(dim(feat), c(2L, 1L))
+  expect_equal(as.vector(feat), c(11, 22)) # [1,1] then [2,2], column-major
+})
+
+test_that(".features respects channel order and names", {
+  lab <- array(0, dim = c(2, 2, 3))
+  lab[, , 1] <- 1 # L*
+  lab[, , 2] <- 2 # a*
+  lab[, , 3] <- 3 # b*
+  mask <- matrix(TRUE, 2, 2)
+
+  feat <- .features(lab, mask, channels = c("b", "L"))
+  expect_equal(colnames(feat), c("b", "L"))
+  expect_true(all(feat[, "b"] == 3))
+  expect_true(all(feat[, "L"] == 1))
+})

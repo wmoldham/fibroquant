@@ -161,7 +161,7 @@ Pull the `a*`/`b*` values at masked tissue pixels only — the clustering input,
 and the fibroquant change from LungDamage. An N×2 matrix, one row per tissue
 pixel.
 
-```{r kmeans-features, eval = FALSE}
+```{r kmeans-features, eval = has_vsi}
 feat <- fibroquant:::.features(lab, sec@mask, channels = c("a", "b"))
 dim(feat)
 head(feat)
