@@ -75,14 +75,13 @@ S7::method(plot, fq_sections) <- function(x, ...) {
   invisible(x)
 }
 
-# Map a severity field to an H x W x 3 RGB array. Each grade takes a viridis
-# colour sampled between positions 0.1 and 0.85; off-tissue pixels are white.
+# Map a severity field to an H x W x 3 RGB array. Each grade takes a colour
+# sampled along a blue -> orange -> red severity ramp; off-tissue pixels are
+# white.
 .pseudocolor <- function(field) {
   values <- field@values
-  pal <- grDevices::hcl.colors(256, "viridis")
-  pos <- seq(0.1, 0.85, length.out = field@k)
-  grade_rgb <- t(grDevices::col2rgb(pal[round(pos * 255) + 1]) / 255)
-
+  pal <- grDevices::colorRampPalette(c("#1F74E0", "#F2891C", "#BE1622"))
+  grade_rgb <- t(grDevices::col2rgb(pal(field@k)) / 255)
   out <- array(1, dim = c(dim(values), 3))
   tissue <- !is.na(values)
   g <- as.integer(values[tissue])
