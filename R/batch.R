@@ -97,6 +97,8 @@ fq_manifest <- function(
 #'   e.g. `"treatment"` so the fit spans the injury range.
 #' @param seed Seed for the fit's slide subsample and k-means restarts, for a
 #'   reproducible basis. Scoring is deterministic and needs no seed.
+#' @param progress Show a progress bar that advances as each slide finishes, in
+#'   both sequential and parallel runs. `FALSE` suppresses it.
 #' @return A list with `scores` (one row per section: `slide_id`, `section`,
 #'   `n_sections`, the analyzer's metrics, and the joined covariates) and `fit`
 #'   (the fitted [fq_analyzer], for reuse or rendering).
@@ -110,7 +112,8 @@ fq_run <- function(
     target_um_px = 4,
     n_ref = NULL,
     stratify = NULL,
-    seed = 1
+    seed = 1,
+    progress = TRUE
 ) {
   if (!is.data.frame(manifest)) {
     stop("`manifest` must be a data frame from fq_manifest().", call. = FALSE)
@@ -161,17 +164,15 @@ fq_run <- function(
             close_um = close_um,
             min_area_frac = min_area_frac
           )
-        n_sections <- length(sections)
         graded <-
           lapply(
-            seq_len(n_sections),
+            seq_along(sections),
             function(i) {
               section <- sections[[i]]
               keys <-
                 tibble::tibble(
                   slide_id = row$slide_id,
-                  section = section@section,
-                  n_sections = n_sections
+                  section = section@section
                 )
               dplyr::bind_cols(keys, fibroquant::fq_score(fit, section))
             }
@@ -197,7 +198,7 @@ fq_run <- function(
     )
 
   # Parallelise only if the caller has set daemons; otherwise run in-process.
-  parts <- purrr::map(rows, worker)
+  parts <- purrr::map(rows, worker, .progress = progress)
   scores <- dplyr::bind_rows(parts)
 
   covariates <- manifest[, setdiff(names(manifest), "path"), drop = FALSE]

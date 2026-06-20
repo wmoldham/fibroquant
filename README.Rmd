@@ -223,10 +223,10 @@ batch-wide severity scale. Pass a subsample — e.g.
 manifest <- 
   fq_manifest(dirname(vsi)) |> 
   dplyr::filter(!stringr::str_detect(slide_id, "_01")) |> 
-  dplyr::slice_head(n = 10)
+  dplyr::slice_head(n = 5)
 manifest$treatment <- "bleo"   # attach any covariates as columns
 
-result <- fq_run(manifest, fq_kmeans(k = 3), n_ref = 1)
+result <- fq_run(manifest, fq_kmeans(k = 3))
 result$scores
 ```
 

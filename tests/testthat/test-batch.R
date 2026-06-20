@@ -71,7 +71,7 @@ test_that("fq_run scores every section and joins covariates", {
   expect_equal(nrow(out$scores), 6L) # 3 slides x 2 sections
   expect_true(
     all(
-      c("slide_id", "section", "n_sections", "treatment", "severity_index") %in%
+      c("slide_id", "section", "treatment", "severity_index") %in%
         names(out$scores)
     )
   )

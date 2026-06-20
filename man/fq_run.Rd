@@ -11,9 +11,10 @@ fq_run(
   close_um = 50,
   min_area_frac = 0.05,
   target_um_px = 4,
-  n_ref = 8,
+  n_ref = NULL,
   stratify = NULL,
-  seed = 1
+  seed = 1,
+  progress = TRUE
 )
 }
 \arguments{
@@ -37,15 +38,19 @@ dropped.}
 nearest level is chosen. Keep it matched between the fit and the scored
 slides so the basis and the data it scores share a resolution.}
 
-\item{n_ref}{Number of slides to subsample for the fit (ignored when
-\code{analyzer} is already fitted). The first section of each is pooled, so
-near-duplicate sections from one slide are not double-counted.}
+\item{n_ref}{Number of slides to subsample for the fit, or \code{NULL} (default) to
+use every slide. Ignored when \code{analyzer} is already fitted. The first
+section of each reference slide is pooled, so near-duplicate sections from
+one slide are not double-counted.}
 
 \item{stratify}{Optional manifest column to balance the subsample across,
 e.g. \code{"treatment"} so the fit spans the injury range.}
 
 \item{seed}{Seed for the fit's slide subsample and k-means restarts, for a
 reproducible basis. Scoring is deterministic and needs no seed.}
+
+\item{progress}{Show a progress bar that advances as each slide finishes, in
+both sequential and parallel runs. \code{FALSE} suppresses it.}
 }
 \value{
 A list with \code{scores} (one row per section: \code{slide_id}, \code{section},
