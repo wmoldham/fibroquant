@@ -157,6 +157,7 @@ spec
 #>  @ channels    : chr [1:2] "a" "b"
 #>  @ smooth_sigma: num 2
 #>  @ nstart      : num 3
+#>  @ max_px      : num 1e+05
 ```
 
 #### 2. Smoothing
@@ -220,17 +221,17 @@ severity ordering; nothing is stored back on the sections.
 fit <- fq_fit(spec, sections)
 fit@centers  # 3 x 2 in a*b* space
 #>          a         b
-#> 1 23.68327 -16.50756
-#> 3 32.00005 -21.90204
-#> 2 48.25337 -26.15450
+#> 3 23.66337 -16.49101
+#> 1 31.96453 -21.87974
+#> 2 48.19976 -26.15090
 fit@luminance # cluster -> rank: mean L*, severity 1..3
-#> [1] 69.98317 66.82881 64.27776
+#> [1] 69.98947 66.84905 64.27750
 ```
 
 #### 6. Per-section score
 
 `fq_score` applies the fitted basis to one section and measures area per
-grade. One row: `severity_index` (area-weighted, 0–1) plus `frac_sev_1`
+grade. One row: `severity_index` (area-weighted, 0–10) plus `frac_sev_1`
 … `frac_sev_3`.
 
 ``` r
@@ -238,7 +239,7 @@ fq_score(fit, sec)
 #> # A tibble: 1 × 4
 #>   severity_index frac_sev_1 frac_sev_2 frac_sev_3
 #>            <dbl>      <dbl>      <dbl>      <dbl>
-#> 1           3.80      0.420      0.400      0.180
+#> 1           3.81      0.418      0.402      0.180
 ```
 
 #### 7. The severity map
@@ -254,3 +255,74 @@ plot(rendered)
 ```
 
 <img src="man/figures/README-kmeans-render-1.png" alt="" width="100%" />
+
+## Batch processing
+
+Scoring generalises from one slide to a folder of them. `fq_manifest()`
+discovers the slides and gives each a stable `slide_id` for joining
+scores back to files and naming saved maps:
+
+``` r
+manifest <- fq_manifest(dirname(vsi))
+manifest
+#> # A tibble: 173 × 2
+#>    slide_id      path                                                     
+#>    <chr>         <chr>                                                    
+#>  1 Image_3470_01 /run/media/will/Will/Mouse lung 6.10.26/Image_3470_01.vsi
+#>  2 Image_3470    /run/media/will/Will/Mouse lung 6.10.26/Image_3470.vsi   
+#>  3 Image_3472_01 /run/media/will/Will/Mouse lung 6.10.26/Image_3472_01.vsi
+#>  4 Image_3472    /run/media/will/Will/Mouse lung 6.10.26/Image_3472.vsi   
+#>  5 Image_3473_01 /run/media/will/Will/Mouse lung 6.10.26/Image_3473_01.vsi
+#>  6 Image_3473    /run/media/will/Will/Mouse lung 6.10.26/Image_3473.vsi   
+#>  7 Image_3474_01 /run/media/will/Will/Mouse lung 6.10.26/Image_3474_01.vsi
+#>  8 Image_3474    /run/media/will/Will/Mouse lung 6.10.26/Image_3474.vsi   
+#>  9 Image_3475_01 /run/media/will/Will/Mouse lung 6.10.26/Image_3475_01.vsi
+#> 10 Image_3475    /run/media/will/Will/Mouse lung 6.10.26/Image_3475.vsi   
+#> # ℹ 163 more rows
+```
+
+For a batch the cluster basis is fit **once** and then frozen, so a
+grade means the same thing on every slide. `fq_read_sections()` reads
+and splits a chosen subsample into one pooled list, which `fq_fit()`
+clusters into a single batch-wide severity scale. Pass a subsample —
+e.g. `dplyr::slice_sample(manifest, n = 8)` — for large batches:
+
+``` r
+manifest <- 
+  fq_manifest(dirname(vsi)) |> 
+  dplyr::filter(!stringr::str_detect(slide_id, "_01")) |> 
+  dplyr::slice_head(n = 10)
+manifest$treatment <- "bleo"   # attach any covariates as columns
+
+result <- fq_run(manifest, fq_kmeans(k = 3), n_ref = 1)
+result$scores
+#> # A tibble: 20 × 8
+#>    slide_id   section n_sections severity_index frac_sev_1 frac_sev_2 frac_sev_3
+#>    <chr>      <chr>        <int>          <dbl>      <dbl>      <dbl>      <dbl>
+#>  1 Image_3470 A                2           4.21      0.367      0.424      0.209
+#>  2 Image_3470 B                2           4.58      0.310      0.465      0.225
+#>  3 Image_3472 A                2           2.89      0.550      0.322      0.128
+#>  4 Image_3472 B                2           3.29      0.470      0.402      0.128
+#>  5 Image_3473 A                2           3.80      0.429      0.381      0.190
+#>  6 Image_3473 B                2           3.69      0.454      0.353      0.193
+#>  7 Image_3474 A                2           4.26      0.339      0.470      0.191
+#>  8 Image_3474 B                2           4.81      0.254      0.531      0.215
+#>  9 Image_3475 A                2           3.83      0.488      0.257      0.255
+#> 10 Image_3475 B                2           4.02      0.454      0.287      0.258
+#> 11 Image_3477 A                2           5.61      0.230      0.416      0.353
+#> 12 Image_3477 B                2           5.74      0.213      0.425      0.362
+#> 13 Image_3478 A                2           4.96      0.316      0.377      0.307
+#> 14 Image_3478 B                2           4.87      0.321      0.385      0.294
+#> 15 Image_3479 A                2           5.82      0.195      0.446      0.359
+#> 16 Image_3479 B                2           5.86      0.190      0.448      0.361
+#> 17 Image_3480 A                2           5.45      0.264      0.381      0.354
+#> 18 Image_3480 B                2           5.69      0.243      0.376      0.381
+#> 19 Image_3481 A                2           6.43      0.158      0.397      0.445
+#> 20 Image_3481 B                2           6.57      0.145      0.396      0.459
+#> # ℹ 1 more variable: treatment <chr>
+```
+
+That frozen `batch_fit` scores and renders every section across the
+folder on a shared scale. The driver that maps it over the manifest and
+aggregates the per-section rows into one results tibble — in parallel
+via `future`/`furrr` — is the next piece.

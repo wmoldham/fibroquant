@@ -184,7 +184,7 @@ fit@luminance # cluster -> rank: mean L*, severity 1..3
 #### 6. Per-section score
 
 `fq_score` applies the fitted basis to one section and measures area per grade.
-One row: `severity_index` (area-weighted, 0–1) plus `frac_sev_1` … `frac_sev_3`.
+One row: `severity_index` (area-weighted, 0–10) plus `frac_sev_1` … `frac_sev_3`.
 
 ```{r kmeans-score, eval = has_vsi}
 fq_score(fit, sec)
@@ -201,3 +201,36 @@ functions.
 rendered <- fq_render(fit, sec)
 plot(rendered)
 ```
+
+## Batch processing
+
+Scoring generalises from one slide to a folder of them. `fq_manifest()` discovers
+the slides and gives each a stable `slide_id` for joining scores back to files
+and naming saved maps:
+
+```{r manifest, eval = has_vsi}
+manifest <- fq_manifest(dirname(vsi))
+manifest
+```
+
+For a batch the cluster basis is fit **once** and then frozen, so a grade means
+the same thing on every slide. `fq_read_sections()` reads and splits a chosen
+subsample into one pooled list, which `fq_fit()` clusters into a single
+batch-wide severity scale. Pass a subsample — e.g.
+`dplyr::slice_sample(manifest, n = 8)` — for large batches:
+
+```{r batch-fit, eval = has_vsi}
+manifest <- 
+  fq_manifest(dirname(vsi)) |> 
+  dplyr::filter(!stringr::str_detect(slide_id, "_01")) |> 
+  dplyr::slice_head(n = 10)
+manifest$treatment <- "bleo"   # attach any covariates as columns
+
+result <- fq_run(manifest, fq_kmeans(k = 3), n_ref = 1)
+result$scores
+```
+
+That frozen `batch_fit` scores and renders every section across the folder on a
+shared scale. The driver that maps it over the manifest and aggregates the
+per-section rows into one results tibble — in parallel via `future`/`furrr` — is
+the next piece.

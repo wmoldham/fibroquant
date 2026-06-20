@@ -4,7 +4,13 @@
 \alias{fq_kmeans}
 \title{k-means colour-segmentation spec}
 \usage{
-fq_kmeans(k = 3, channels = c("a", "b"), smooth_sigma = 2, nstart = 3)
+fq_kmeans(
+  k = 3,
+  channels = c("a", "b"),
+  smooth_sigma = 2,
+  nstart = 3,
+  max_px = 1e+05
+)
 }
 \arguments{
 \item{k}{Number of severity grades (clusters). Default 3 reproduces the three
@@ -22,12 +28,17 @@ into the rim. \code{0} disables smoothing.}
 
 \item{nstart}{Number of k-means restarts; the lowest within-cluster
 sum-of-squares fit is kept.}
+
+\item{max_px}{Maximum tissue pixels sampled per section when fitting. Caps
+each section's contribution so slides are weighted equally and the fit
+stays tractable on large batches; \code{Inf} uses every pixel. Sampling is
+random, so set a seed for a reproducible fit.}
 }
 \value{
 An \code{fq_kmeans} spec.
 }
 \description{
-\link[=fq_spec]{Spec} for the k-means analyzer: cluster masked tissue pixels in
+\link[=fq_spec]{spec} for the k-means analyzer: cluster masked tissue pixels in
 CIELAB colour space, then rank the clusters by luminance into severity
 grades. Pass the result to \code{\link[=fq_fit]{fq_fit()}}.
 }

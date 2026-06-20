@@ -2,7 +2,7 @@
 
 #' k-means colour-segmentation spec
 #'
-#' [Spec][fq_spec] for the k-means analyzer: cluster masked tissue pixels in
+#' [spec][fq_spec] for the k-means analyzer: cluster masked tissue pixels in
 #' CIELAB colour space, then rank the clusters by luminance into severity
 #' grades. Pass the result to [fq_fit()].
 #'
@@ -18,6 +18,10 @@
 #'   into the rim. `0` disables smoothing.
 #' @param nstart Number of k-means restarts; the lowest within-cluster
 #'   sum-of-squares fit is kept.
+#' @param max_px Maximum tissue pixels sampled per section when fitting. Caps
+#'   each section's contribution so slides are weighted equally and the fit
+#'   stays tractable on large batches; `Inf` uses every pixel. Sampling is
+#'   random, so set a seed for a reproducible fit.
 #' @return An `fq_kmeans` spec.
 #' @export
 fq_kmeans <-
@@ -28,7 +32,8 @@ fq_kmeans <-
       k = S7::new_property(S7::class_numeric, default = 3),
       channels = S7::new_property(S7::class_character, default = c("a", "b")),
       smooth_sigma = S7::new_property(S7::class_numeric, default = 2),
-      nstart = S7::new_property(S7::class_numeric, default = 3)
+      nstart = S7::new_property(S7::class_numeric, default = 3),
+      max_px = S7::new_property(S7::class_numeric, default = 1e5)
     ),
     validator = function(self) {
       if (length(self@k) != 1L || is.na(self@k) ||
@@ -46,6 +51,10 @@ fq_kmeans <-
       if (length(self@nstart) != 1L || is.na(self@nstart) ||
           self@nstart < 1 || self@nstart %% 1 != 0) {
         return("`nstart` must be a single whole number >= 1")
+      }
+      if (length(self@max_px) != 1L || is.na(self@max_px) ||
+          self@max_px < 1) {
+        return("`max_px` must be a single number >= 1 (Inf disables the cap)")
       }
       NULL
     }
@@ -166,13 +175,19 @@ fq_field <-
 
 # Pool masked tissue pixels across sections, k-means on the chosen channels,
 # then order clusters by descending mean L* so centre row i is severity grade i.
+# Each section is capped to spec@max_px pixels before pooling, so a large
+# section cannot outweigh a small one and the fit stays tractable.
 S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
   prepped <- lapply(sections, function(s) {
     lab <- .lab(.smooth(s@rgb, spec@smooth_sigma, s@mask))
-    list(
-      x = .features(lab, s@mask, spec@channels),
-      lum = .features(lab, s@mask, "L")[, 1]
-    )
+    x <- .features(lab, s@mask, spec@channels)
+    lum <- .features(lab, s@mask, "L")[, 1]
+    if (nrow(x) > spec@max_px) {
+      keep <- sample.int(nrow(x), as.integer(spec@max_px))
+      x <- x[keep, , drop = FALSE]
+      lum <- lum[keep]
+    }
+    list(x = x, lum = lum)
   })
   x <- do.call(rbind, lapply(prepped, function(p) p$x))
   lum <- unlist(lapply(prepped, function(p) p$lum))

@@ -229,3 +229,10 @@ test_that("fq_render returns a grade field with NA off tissue", {
   expect_true(all(fld@values[1:10, 2:20] == 1)) # cyan -> grade 1
   expect_true(all(fld@values[11:20, 2:20] == 2)) # red -> grade 2
 })
+
+test_that("fq_kmeans carries and validates max_px", {
+  expect_equal(fq_kmeans()@max_px, 1e5)
+  expect_equal(fq_kmeans(max_px = 5e4)@max_px, 5e4)
+  expect_error(fq_kmeans(max_px = 0), "max_px")
+  expect_error(fq_kmeans(max_px = c(1, 2)), "max_px")
+})

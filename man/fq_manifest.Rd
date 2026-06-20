@@ -25,5 +25,6 @@ extension) and \code{path} (normalised absolute path), ordered by \code{path}.
 Scans a directory (or takes an explicit list of paths) for slide files
 \code{\link[=fq_read]{fq_read()}} can open and returns one row per file. The manifest fixes the set
 of slides for a batch and gives each a stable \code{slide_id} for joining scores
-back to their file and naming rendered maps.
+back to their file. Add experimental covariates (treatment, sex, age, ...) as
+further columns; \code{\link[=fq_run]{fq_run()}} propagates them to the results.
 }
