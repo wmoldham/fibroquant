@@ -6,6 +6,15 @@
 \usage{
 fq_field(values = integer(0), k = integer(0))
 }
+\arguments{
+\item{values}{Numeric H x W grid of severity grades (1 to \code{k}), \code{NA} off
+tissue.}
+
+\item{k}{Number of severity grades.}
+}
+\value{
+An \code{fq_field} object.
+}
 \description{
 The spatial output of \code{\link[=fq_render]{fq_render()}}: an H x W grid carrying each tissue
 pixel's severity grade (1 to \code{k}), \code{NA} off tissue. The plot functions

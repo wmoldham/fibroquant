@@ -34,12 +34,17 @@ fq_slide <-
 #' A single tissue section cropped from a slide
 #'
 #' One lung section extracted by [fq_split()]. Inherits everything from
-#' [fq_slide] and adds the tissue footprint and the crop provenance, so a section
-#' carries both its pixels and where it sat in the parent scan.
+#' [fq_slide] and adds the analysis mask, the filled silhouette, and the crop
+#' provenance, so a section carries both its pixels and where it sat in the
+#' parent scan.
 #'
 #' @inheritParams fq_slide
-#' @param mask Logical tissue footprint, the same height x width as `rgb`; the
+#' @param mask Logical analysis mask, the same height x width as `rgb`:
+#'   foreground tissue with airway and other whitespace lumen excluded. The
 #'   denominator for density and the pixel pool for clustering.
+#' @param footprint Logical section silhouette, the same height x width as `rgb`:
+#'   the filled connected component that sets the crop box and the outline.
+#'   Defaults to `mask` when a section has no distinct silhouette.
 #' @param bbox The crop box in parent coordinates, a list with `rows` and `cols`.
 #' @param section The section label, e.g. `"A"` or `"B"`.
 #' @return An `fq_section` object.
@@ -50,14 +55,36 @@ fq_section <-
     parent = fq_slide,
     properties = list(
       mask = S7::class_logical,
+      footprint = S7::class_logical,
       bbox = S7::class_list,
       section = S7::class_character
     ),
+    constructor = function(rgb,
+                           um_per_px = NA_real_,
+                           source = list(),
+                           mask,
+                           bbox = list(),
+                           section = NA_character_,
+                           footprint = mask) {
+      S7::new_object(
+        fq_slide(
+          rgb = rgb,
+          um_per_px = um_per_px,
+          source = source
+        ),
+        mask = mask,
+        footprint = footprint,
+        bbox = bbox,
+        section = section
+      )
+    },
     validator = function(self) {
       if (length(dim(self@mask)) != 2L) {
         "@mask must be a 2-D logical matrix"
       } else if (!identical(dim(self@mask), dim(self@rgb)[1:2])) {
         "@mask must have the same height and width as @rgb"
+      } else if (!identical(dim(self@footprint), dim(self@rgb)[1:2])) {
+        "@footprint must have the same height and width as @rgb"
       } else if (length(self@section) != 1L) {
         "@section must be a single label"
       }

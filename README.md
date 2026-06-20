@@ -17,7 +17,8 @@ devtools::load_all()
 #> ℹ Loading fibroquant
 
 # vsi <- "/path/to/vsi/image"
-vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
+# vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
+vsi <- "/run/media/will/Will/Mouse lung 6.10.26/Image_3470.vsi"
 has_vsi <- file.exists(vsi)
 ```
 
@@ -70,8 +71,8 @@ sections <-
   )
 sections
 #> <fq_sections> 2 section(s)
-#>   <fq_section A> 2300 × 1145 px · 4.38 µm/px · 76% tissue · Image_3470.vsi
-#>   <fq_section B> 2300 × 1143 px · 4.38 µm/px · 77% tissue · Image_3470.vsi
+#>   <fq_section A> 2300 × 1145 px · 4.38 µm/px · 18% tissue · Image_3470.vsi
+#>   <fq_section B> 2300 × 1143 px · 4.38 µm/px · 18% tissue · Image_3470.vsi
 ```
 
 ## Visualizing
@@ -164,7 +165,7 @@ A Gaussian blur (sigma in pixels) damps single-pixel stain speckle
 before clustering. Same H×W×3 array, slightly softened.
 
 ``` r
-sm <- fibroquant:::.smooth(sec@rgb, sigma = 2)
+sm <- fibroquant:::.smooth(sec@rgb, sigma = 0)
 EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 ```
 
@@ -197,15 +198,15 @@ per tissue pixel.
 ``` r
 feat <- fibroquant:::.features(lab, sec@mask, channels = c("a", "b"))
 dim(feat)
-#> [1] 2010584       2
+#> [1] 463327      2
 head(feat)
 #>              a         b
-#> [1,]  2.950530 -1.870605
-#> [2,]  4.907311 -3.482058
-#> [3,]  5.506055 -3.658772
-#> [4,]  6.017791 -3.933166
-#> [5,]  6.307494 -4.215812
-#> [6,] 14.907701 -9.594280
+#> [1,]  2.808943  -1.24876
+#> [2,] 32.243008 -21.36482
+#> [3,] 32.228354 -22.48672
+#> [4,] 28.242389 -21.39894
+#> [5,] 22.065641 -15.48909
+#> [6,] 26.420241 -20.57937
 ```
 
 #### 5. Fitting the basis
@@ -218,12 +219,12 @@ severity ordering; nothing is stored back on the sections.
 ``` r
 fit <- fq_fit(spec, sections)
 fit@centers  # 3 x 2 in a*b* space
-#>           a          b
-#> 2  5.634223  -4.127236
-#> 1 16.193490 -11.294584
-#> 3 36.989527 -21.307050
+#>          a         b
+#> 1 23.68327 -16.50756
+#> 3 32.00005 -21.90204
+#> 2 48.25337 -26.15450
 fit@luminance # cluster -> rank: mean L*, severity 1..3
-#> [1] 91.41828 84.11127 72.75679
+#> [1] 69.98317 66.82881 64.27776
 ```
 
 #### 6. Per-section score
@@ -237,7 +238,7 @@ fq_score(fit, sec)
 #> # A tibble: 1 × 4
 #>   severity_index frac_sev_1 frac_sev_2 frac_sev_3
 #>            <dbl>      <dbl>      <dbl>      <dbl>
-#> 1           3.10      0.448      0.484     0.0681
+#> 1           3.80      0.420      0.400      0.180
 ```
 
 #### 7. The severity map

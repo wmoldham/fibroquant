@@ -49,6 +49,39 @@ test_that(".smooth with sigma 0 returns the image unchanged", {
   expect_identical(.smooth(rgb, sigma = 0), rgb)
 })
 
+test_that(".smooth keeps airspace from bleeding into masked tissue", {
+  rgb <-
+    array(
+      1,
+      dim = c(20, 20, 3)
+    )
+  rgb[5:15, 5:15, ] <- 0.2   # tissue block on bright airspace
+  mask <- matrix(FALSE, 20, 20)
+  mask[5:15, 5:15] <- TRUE
+
+  naive <-
+    .smooth(
+      rgb,
+      sigma = 2
+    )
+  masked <-
+    .smooth(
+      rgb,
+      sigma = 2,
+      mask = mask
+    )
+
+  # Naive smoothing lightens the tissue rim toward the airspace.
+  expect_gt(max(naive[, , 1][mask]), 0.2)
+
+  # Mask-aware smoothing leaves uniform tissue uniform: airspace adds no weight.
+  expect_equal(
+    masked[, , 1][mask],
+    rep(0.2, sum(mask)),
+    tolerance = 1e-6
+  )
+})
+
 test_that(".lab converts to CIELAB with L*a*b* in channel order", {
   rgb <- array(0, dim = c(2, 2, 3))
   rgb[1, 1, ] <- c(1, 1, 1) # white

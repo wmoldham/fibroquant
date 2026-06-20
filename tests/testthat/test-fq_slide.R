@@ -161,3 +161,26 @@ test_that("print.fq_slide writes the summary and returns its input invisibly", {
   expect_false(result$visible)
   expect_identical(result$value, slide)
 })
+
+test_that("fq_section requires a footprint the size of rgb", {
+  rgb <-
+    array(
+      0.2,
+      dim = c(10, 8, 3)
+    )
+  mask <- matrix(TRUE, 10, 8)
+  build <- function(footprint) {
+    fq_section(
+      rgb = rgb,
+      um_per_px = 4,
+      source = list(),
+      mask = mask,
+      footprint = footprint,
+      bbox = list(rows = c(1, 10), cols = c(1, 8)),
+      section = "A"
+    )
+  }
+
+  expect_error(build(matrix(TRUE, 5, 5)), "footprint")  # wrong size
+  expect_true(S7::S7_inherits(build(matrix(TRUE, 10, 8)), fq_section))
+})

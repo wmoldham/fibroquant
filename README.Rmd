@@ -28,7 +28,8 @@ texture.
 devtools::load_all()
 
 # vsi <- "/path/to/vsi/image"
-vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
+# vsi <- "/Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi"
+vsi <- "/run/media/will/Will/Mouse lung 6.10.26/Image_3470.vsi"
 has_vsi <- file.exists(vsi)
 ```
 
@@ -140,7 +141,7 @@ A Gaussian blur (sigma in pixels) damps single-pixel stain speckle before
 clustering. Same H×W×3 array, slightly softened.
 
 ```{r kmeans-smooth, eval = has_vsi}
-sm <- fibroquant:::.smooth(sec@rgb, sigma = 2)
+sm <- fibroquant:::.smooth(sec@rgb, sigma = 0)
 EBImage::display(EBImage::Image(sm, colormode = "Color"), method = "raster")
 ```
 

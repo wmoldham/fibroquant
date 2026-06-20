@@ -5,12 +5,13 @@
 \title{A single tissue section cropped from a slide}
 \usage{
 fq_section(
-  rgb = numeric(0),
-  um_per_px = integer(0),
+  rgb,
+  um_per_px = NA_real_,
   source = list(),
-  mask = logical(0),
+  mask,
   bbox = list(),
-  section = character(0)
+  section = NA_character_,
+  footprint = mask
 )
 }
 \arguments{
@@ -21,18 +22,24 @@ fq_section(
 \item{source}{A list of provenance (path, format, series, resolution, native
 microns/pixel, dims) describing where this image came from.}
 
-\item{mask}{Logical tissue footprint, the same height x width as \code{rgb}; the
+\item{mask}{Logical analysis mask, the same height x width as \code{rgb}:
+foreground tissue with airway and other whitespace lumen excluded. The
 denominator for density and the pixel pool for clustering.}
 
 \item{bbox}{The crop box in parent coordinates, a list with \code{rows} and \code{cols}.}
 
 \item{section}{The section label, e.g. \code{"A"} or \code{"B"}.}
+
+\item{footprint}{Logical section silhouette, the same height x width as \code{rgb}:
+the filled connected component that sets the crop box and the outline.
+Defaults to \code{mask} when a section has no distinct silhouette.}
 }
 \value{
 An \code{fq_section} object.
 }
 \description{
 One lung section extracted by \code{\link[=fq_split]{fq_split()}}. Inherits everything from
-\link{fq_slide} and adds the tissue footprint and the crop provenance, so a section
-carries both its pixels and where it sat in the parent scan.
+\link{fq_slide} and adds the analysis mask, the filled silhouette, and the crop
+provenance, so a section carries both its pixels and where it sat in the
+parent scan.
 }

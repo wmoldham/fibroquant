@@ -77,7 +77,11 @@ fq_split <- function(slide,
   cols <- range(which(colSums(region) > 0))
 
   rgb <- slide@rgb[rows[1]:rows[2], cols[1]:cols[2], , drop = FALSE]
-  mask <- region[rows[1]:rows[2], cols[1]:cols[2], drop = FALSE]
+  footprint <- region[rows[1]:rows[2], cols[1]:cols[2], drop = FALSE]
+
+  # Re-threshold the cropped section to drop the airway and whitespace lumen the
+  # split filled over; intersect with the footprint to hold the section boundary.
+  mask <- .tissue_mask(rgb) & footprint
 
   fq_section(
     rgb = rgb,
@@ -92,6 +96,7 @@ fq_split <- function(slide,
       dims = dim(rgb)[1:2]
     ),
     mask = mask,
+    footprint = footprint,
     bbox = list(rows = rows, cols = cols),
     section = LETTERS[index]
   )

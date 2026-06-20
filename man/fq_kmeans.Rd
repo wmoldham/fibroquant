@@ -16,7 +16,9 @@ excludes background.}
 the severity ordering.}
 
 \item{smooth_sigma}{Gaussian-blur sigma in pixels applied before clustering,
-to damp single-pixel stain speckle. \code{0} disables smoothing.}
+to damp single-pixel stain speckle. The blur is a mask-aware normalised
+convolution, so airspace carries no weight into tissue and cannot bleed
+into the rim. \code{0} disables smoothing.}
 
 \item{nstart}{Number of k-means restarts; the lowest within-cluster
 sum-of-squares fit is kept.}

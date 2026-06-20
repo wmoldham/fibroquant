@@ -67,3 +67,57 @@ test_that("fq_split splits a real .vsi into sections (integration)", {
   )
   expect_gte(length(sections), 1)
 })
+
+# A dark tissue blob with a bright airway lumen punched through it. The split
+# fills the lumen into the footprint; the analysis mask must drop it again.
+fake_airway_slide <- function() {
+  rgb <-
+    array(
+      1,
+      dim = c(60, 40, 3)
+    )
+  rgb[15:45, 10:30, ] <- 0.2   # tissue blob
+  rgb[27:33, 17:23, ] <- 0.95  # airway lumen inside it
+  fq_slide(
+    rgb = rgb,
+    um_per_px = 4,
+    source = list(
+      path = "fake.vsi",
+      format = "bioformats",
+      dims = c(60L, 40L)
+    )
+  )
+}
+
+test_that("fq_split excludes airway lumen from the analysis mask", {
+  sec <- fq_split(
+    fake_airway_slide(),
+    n = 1,
+    close_um = 4
+  )[[1]]
+
+  # The footprint keeps the filled lumen; the mask drops it.
+  expect_gt(sum(sec@footprint), sum(sec@mask))
+
+  # The lumen centre is inside the footprint, outside the mask.
+  bbox <- sec@bbox
+  lum_r <- 30 - bbox$rows[1] + 1
+  lum_c <- 20 - bbox$cols[1] + 1
+  expect_true(sec@footprint[lum_r, lum_c])
+  expect_false(sec@mask[lum_r, lum_c])
+
+  # The dropped pixels are bright lumen, not tissue.
+  dropped <- sec@footprint & !sec@mask
+  lum <- (sec@rgb[, , 1] + sec@rgb[, , 2] + sec@rgb[, , 3]) / 3
+  expect_gt(mean(lum[dropped]), mean(lum[sec@mask]))
+})
+
+test_that("fq_split sections carry a footprint matching rgb", {
+  sec <- fq_split(
+    fake_airway_slide(),
+    n = 1,
+    close_um = 4
+  )[[1]]
+  expect_identical(dim(sec@footprint), dim(sec@rgb)[1:2])
+  expect_type(sec@footprint, "logical")
+})

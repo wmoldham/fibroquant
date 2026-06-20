@@ -13,7 +13,9 @@
 #'   `"b"`. Default `c("a", "b")` clusters on chroma alone, leaving lightness to
 #'   the severity ordering.
 #' @param smooth_sigma Gaussian-blur sigma in pixels applied before clustering,
-#'   to damp single-pixel stain speckle. `0` disables smoothing.
+#'   to damp single-pixel stain speckle. The blur is a mask-aware normalised
+#'   convolution, so airspace carries no weight into tissue and cannot bleed
+#'   into the rim. `0` disables smoothing.
 #' @param nstart Number of k-means restarts; the lowest within-cluster
 #'   sum-of-squares fit is kept.
 #' @return An `fq_kmeans` spec.
@@ -55,6 +57,12 @@ fq_kmeans <-
 #' reordered into severity grades (row 1 = mildest, row k = most severe) and
 #' each grade's mean lightness. Consumed by [fq_score()] and [fq_render()].
 #'
+#' @param spec The [fq_kmeans()] spec this basis was fit from.
+#' @param centers Cluster centres in the clustered channels, one row per grade,
+#'   ordered mildest (row 1) to most severe (row k).
+#' @param luminance Mean L* per grade, in the same order as the rows of
+#'   `centers`.
+#' @return An `fq_kmeans_analyzer` object.
 #' @export
 fq_kmeans_analyzer <-
   S7::new_class(
@@ -73,6 +81,10 @@ fq_kmeans_analyzer <-
 #' pixel's severity grade (1 to `k`), `NA` off tissue. The plot functions
 #' pseudocolour it.
 #'
+#' @param values Numeric H x W grid of severity grades (1 to `k`), `NA` off
+#'   tissue.
+#' @param k Number of severity grades.
+#' @return An `fq_field` object.
 #' @export
 fq_field <-
   S7::new_class(
@@ -84,15 +96,37 @@ fq_field <-
   )
 
 # Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
-# pixels; 0 leaves the image unchanged.
-.smooth <- function(rgb, sigma) {
+# pixels; 0 leaves the image unchanged. With a mask, blur as a normalised
+# convolution so off-mask pixels (airspace) carry no weight into masked tissue.
+.smooth <- function(rgb, sigma, mask = NULL) {
   if (sigma <= 0) {
     return(rgb)
   }
-  EBImage::gblur(
-    rgb,
+  if (is.null(mask)) {
+    return(
+      EBImage::gblur(
+        rgb,
+        sigma = sigma
+      )
+    )
+  }
+
+  m <- mask * 1
+  weight <- EBImage::gblur(
+    m,
     sigma = sigma
   )
+  out <- rgb
+  for (ch in seq_len(dim(rgb)[3L])) {
+    blurred <- EBImage::gblur(
+      rgb[, , ch] * m,
+      sigma = sigma
+    )
+    smoothed <- blurred / weight
+    smoothed[!mask] <- rgb[, , ch][!mask]  # off-tissue is unused; avoid 0/0
+    out[, , ch] <- smoothed
+  }
+  out
 }
 
 # Convert sRGB to CIELAB pixelwise; returns an H x W x 3 array of L*, a*, b*.
@@ -119,7 +153,7 @@ fq_field <-
 # already in severity order. Returns a grade per pixel in column-major order.
 .assign <- function(section, fit) {
   spec <- fit@spec
-  lab <- .lab(.smooth(section@rgb, spec@smooth_sigma))
+  lab <- .lab(.smooth(section@rgb, spec@smooth_sigma, section@mask))
   x <- .features(lab, section@mask, spec@channels)
   centers <- fit@centers
   d <- vapply(
@@ -134,7 +168,7 @@ fq_field <-
 # then order clusters by descending mean L* so centre row i is severity grade i.
 S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
   prepped <- lapply(sections, function(s) {
-    lab <- .lab(.smooth(s@rgb, spec@smooth_sigma))
+    lab <- .lab(.smooth(s@rgb, spec@smooth_sigma, s@mask))
     list(
       x = .features(lab, s@mask, spec@channels),
       lum = .features(lab, s@mask, "L")[, 1]

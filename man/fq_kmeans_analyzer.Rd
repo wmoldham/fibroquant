@@ -10,6 +10,18 @@ fq_kmeans_analyzer(
   luminance = integer(0)
 )
 }
+\arguments{
+\item{spec}{The \code{\link[=fq_kmeans]{fq_kmeans()}} spec this basis was fit from.}
+
+\item{centers}{Cluster centres in the clustered channels, one row per grade,
+ordered mildest (row 1) to most severe (row k).}
+
+\item{luminance}{Mean L* per grade, in the same order as the rows of
+\code{centers}.}
+}
+\value{
+An \code{fq_kmeans_analyzer} object.
+}
 \description{
 The basis learned by \code{\link[=fq_fit]{fq_fit()}} from an \code{\link[=fq_kmeans]{fq_kmeans()}} spec: cluster centres
 reordered into severity grades (row 1 = mildest, row k = most severe) and
