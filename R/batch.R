@@ -89,9 +89,10 @@ fq_manifest <- function(
 #' @param target_um_px Working resolution in microns/pixel for [fq_read()]; the
 #'   nearest level is chosen. Keep it matched between the fit and the scored
 #'   slides so the basis and the data it scores share a resolution.
-#' @param n_ref Number of slides to subsample for the fit (ignored when
-#'   `analyzer` is already fitted). The first section of each is pooled, so
-#'   near-duplicate sections from one slide are not double-counted.
+#' @param n_ref Number of slides to subsample for the fit, or `NULL` (default) to
+#'   use every slide. Ignored when `analyzer` is already fitted. The first
+#'   section of each reference slide is pooled, so near-duplicate sections from
+#'   one slide are not double-counted.
 #' @param stratify Optional manifest column to balance the subsample across,
 #'   e.g. `"treatment"` so the fit spans the injury range.
 #' @param seed Seed for the fit's slide subsample and k-means restarts, for a
@@ -107,7 +108,7 @@ fq_run <- function(
     close_um = 50,
     min_area_frac = 0.05,
     target_um_px = 4,
-    n_ref = 8,
+    n_ref = NULL,
     stratify = NULL,
     seed = 1
 ) {
@@ -253,7 +254,7 @@ fq_run <- function(
 # set, else a random draw, or an even draw across the strata of one column.
 .sample_reference <- function(manifest, n_ref, stratify) {
   n_slides <- nrow(manifest)
-  if (n_ref >= n_slides) {
+  if (is.null(n_ref) || n_ref >= n_slides) {
     return(manifest)
   }
   if (is.null(stratify)) {
