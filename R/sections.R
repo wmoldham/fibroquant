@@ -5,8 +5,8 @@
 #' Split a multi-section slide into one fq_section per tissue section
 #'
 #' Lung slides routinely carry several sections side by side. This finds them by
-#' connected components -- consolidating each porous section into a solid blob so
-#' alveolar airspace does not fragment it -- and returns one cropped [fq_section]
+#' connected components, consolidating each porous section into a solid blob so
+#' alveolar airspace does not fragment it, and returns a cropped [fq_section]
 #' per section, ordered along the first spatial axis (left to right for a wide
 #' strip).
 #'

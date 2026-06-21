@@ -93,8 +93,8 @@ fq_manifest <- function(
 #' @param target_um_px Working resolution in microns/pixel for [fq_read()]; the
 #'   nearest level is chosen. Keep it matched between the fit and the scored
 #'   slides so the basis and the data it scores share a resolution.
-#' @param n_ref Number of slides to subsample for the fit, or `NULL` (default) to
-#'   use every slide. Ignored when `analyzer` is already fitted. The first
+#' @param n_ref Number of slides to subsample for the fit, or `NULL` (default)
+#'   to use every slide. Ignored when `analyzer` is already fitted. The first
 #'   section of each reference slide is pooled, so near-duplicate sections from
 #'   one slide are not double-counted.
 #' @param stratify Optional manifest column to balance the subsample across,

@@ -44,10 +44,10 @@ fq_slide <-
 #' @param mask Logical analysis mask, the same height x width as `rgb`:
 #'   foreground tissue with airway and other whitespace lumen excluded. The
 #'   denominator for density and the pixel pool for clustering.
-#' @param footprint Logical section silhouette, the same height x width as `rgb`:
+#' @param footprint Logical section silhouette, same height x width as `rgb`:
 #'   the filled connected component that sets the crop box and the outline.
 #'   Defaults to `mask` when a section has no distinct silhouette.
-#' @param bbox The crop box in parent coordinates, a list with `rows` and `cols`.
+#' @param bbox The crop box in parent coordinates, with `rows` and `cols`.
 #' @param section The section label, e.g. `"A"` or `"B"`.
 #' @return An `fq_section` object.
 #' @export

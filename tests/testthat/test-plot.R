@@ -39,7 +39,9 @@ test_that(".draw_box handles a box flush against the edge", {
       0,
       dim = c(20, 20, 3)
     )
-  expect_no_error(.draw_box(rgb, c(1, 20), c(1, 20), c(1, 0, 0), thickness = 2L))
+  expect_no_error(
+    .draw_box(rgb, c(1, 20), c(1, 20), c(1, 0, 0), thickness = 2L)
+  )
 })
 
 # .draw_section_boxes ----------------------------------------------------------
@@ -90,7 +92,7 @@ test_that(".pseudocolor gives each grade a distinct colour", {
 
 # plot -------------------------------------------------------------------------
 
-test_that("plot renders a section and a slide image, returning input invisibly", {
+test_that("plot renders a section and a slide, returning input invisibly", {
   section <- synth_section()
   slide <-
     fq_slide(

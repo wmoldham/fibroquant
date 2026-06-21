@@ -7,6 +7,8 @@ vsi_path <- function() {
 
 skip_if_no_vsi <- function() {
   if (vsi_path() == "") {
-    testthat::skip("Set FIBROQUANT_TEST_VSI to a .vsi path to run integration tests.")
+    testthat::skip(
+      "Set FIBROQUANT_TEST_VSI to a .vsi path to run integration tests."
+    )
   }
 }

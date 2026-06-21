@@ -19,7 +19,7 @@ test_that(".tissue_mask marks dark tissue and leaves bright background out", {
 
 # .microns_to_px ---------------------------------------------------------------
 
-test_that(".microns_to_px converts, floors at 1, and falls back when uncalibrated", {
+test_that(".microns_to_px converts, floors at 1, falls back if uncalibrated", {
   expect_equal(.microns_to_px(50, 4), 12L)
   expect_equal(.microns_to_px(1, 4), 1L)
   expect_equal(.microns_to_px(50, NA_real_), 10L)

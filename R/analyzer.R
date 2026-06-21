@@ -63,8 +63,8 @@ fq_score <-
 
 #' Render a section's severity field
 #'
-#' Applies a [fit][fq_analyzer] to one section and returns its per-pixel severity
-#' field for pseudocolouring. Dispatches on `fit`.
+#' Applies a [fit][fq_analyzer] to one section and returns its severity field
+#' per pixel, for pseudocolouring. Dispatches on `fit`.
 #'
 #' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.

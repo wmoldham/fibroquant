@@ -27,8 +27,10 @@ fake_meta <-
 
 # .physical_um_per_px ----------------------------------------------------------
 
-test_that(".physical_um_per_px parses the size, scanning past series without it", {
-  ok <- list(list(globalMetadata = list("Physical pixel size" = "(0.2738, 0.2739)")))
+test_that(".physical_um_per_px parses the size, skipping series without it", {
+  ok <- list(list(
+    globalMetadata = list("Physical pixel size" = "(0.2738, 0.2739)")
+  ))
   expect_equal(.physical_um_per_px(ok), 0.2738)
 
   later <-
@@ -48,7 +50,7 @@ test_that(".physical_um_per_px parses the size, scanning past series without it"
 test_that(".info_table normalises indices and computes um/px per level", {
   info <- .info_table(fake_meta())
 
-  expect_equal(sort(unique(info$series)), c(1L, 2L)) # 0-based -> 1-based
+  expect_equal(sort(unique(info$series)), c(1L, 2L)) # normalised to start at 1
   expect_equal(min(info$res), 1L)
   expect_equal(min(info$um_px), 0.5) # finest level = native scale
 
@@ -63,14 +65,15 @@ test_that("fq_info reads a real .vsi (integration)", {
   skip_if_no_vsi()
 
   info <- fq_info(vsi_path())
-  expect_true(all(c("series", "res", "size_x", "size_y", "um_px") %in% names(info)))
+  cols <- c("series", "res", "size_x", "size_y", "um_px")
+  expect_true(all(cols %in% names(info)))
   expect_gt(nrow(info), 0)
   expect_true(all(info$um_px > 0))
 })
 
 # .pick_scan_series ------------------------------------------------------------
 
-test_that(".pick_scan_series picks the largest series despite integer overflow", {
+test_that(".pick_scan_series picks the largest series despite overflow", {
   info <- tibble::tibble(
     series = c(1L, 1L, 2L, 2L, 3L, 3L),
     res = c(1L, 2L, 1L, 2L, 1L, 2L),
@@ -111,7 +114,7 @@ test_that(".as_rgb_array returns a height x width x 3 array in [0, 1]", {
   expect_true(all(out >= 0 & out <= 1))
 
   gray <- EBImage::Image(matrix(runif(10 * 12), 10, 12))
-  expect_equal(dim(.as_rgb_array(gray)), c(10L, 12L, 3L)) # grayscale -> 3 channels
+  expect_equal(dim(.as_rgb_array(gray)), c(10L, 12L, 3L)) # grayscale to RGB
 })
 
 # fq_read ----------------------------------------------------------------------

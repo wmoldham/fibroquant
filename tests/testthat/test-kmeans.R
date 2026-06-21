@@ -159,7 +159,10 @@ test_that(".features respects channel order and names", {
 
 test_that("fq_fit on fq_kmeans returns a severity-ordered analyzer", {
   set.seed(1)
-  fit <- fq_fit(fq_kmeans(k = 2, smooth_sigma = 0), list(two_colour(matrix(TRUE, 20, 20))))
+  fit <- fq_fit(
+    fq_kmeans(k = 2, smooth_sigma = 0),
+    list(two_colour(matrix(TRUE, 20, 20)))
+  )
   expect_true(S7::S7_inherits(fit, fq_kmeans_analyzer))
   expect_true(S7::S7_inherits(fit, fq_analyzer))
   expect_equal(dim(fit@centers), c(2L, 2L))
@@ -209,7 +212,10 @@ test_that("fq_score names fraction columns frac_sev_1..k", {
   fit <- fq_fit(fq_kmeans(k = 3), list(sec))
   sc <- fq_score(fit, sec)
 
-  expect_named(sc, c("severity_index", "frac_sev_1", "frac_sev_2", "frac_sev_3"))
+  expect_named(
+    sc,
+    c("severity_index", "frac_sev_1", "frac_sev_2", "frac_sev_3")
+  )
   expect_equal(sc$frac_sev_1 + sc$frac_sev_2 + sc$frac_sev_3, 1)
 })
 
