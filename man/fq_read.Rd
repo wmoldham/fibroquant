@@ -2,25 +2,28 @@
 % Please edit documentation in R/io.R
 \name{fq_read}
 \alias{fq_read}
-\title{Read a slide at an analysis-appropriate resolution}
+\title{Read a slide at a working resolution}
 \usage{
 fq_read(path, series = NULL, target_um_px = 4, resolution = NULL)
 }
 \arguments{
 \item{path}{Path to a slide file.}
 
-\item{series}{Series index; \code{NULL} auto-selects the scan (largest by area).}
+\item{series}{Series index. \code{NULL} selects the scan series automatically, the
+one largest by area.}
 
-\item{target_um_px}{Desired microns/pixel; the nearest level is chosen.}
+\item{target_um_px}{Desired microns per pixel. The level nearest this value
+is chosen.}
 
-\item{resolution}{Explicit level; overrides \code{target_um_px}.}
+\item{resolution}{An explicit resolution level. Overrides \code{target_um_px} when
+given.}
 }
 \value{
 An \link{fq_slide}.
 }
 \description{
 Reads a whole-slide image into an \link{fq_slide}. For formats \code{RBioFormats}
-handles (e.g. \code{.vsi}) it selects the scan series and the resolution level
-nearest \code{target_um_px}; TIFF/PNG/JPEG are read directly by EBImage as a
+handles, such as \code{.vsi}, it selects the scan series and the resolution level
+nearest \code{target_um_px}. TIFF, PNG, and JPEG are read directly by EBImage as a
 single, uncalibrated level.
 }

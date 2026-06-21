@@ -17,6 +17,6 @@ fq_score(fit, section, ...)
 A one-row tibble: \code{severity_index} plus analyzer-specific columns.
 }
 \description{
-Applies a \link[=fq_analyzer]{fit} to one section and returns its per-section
-metrics. Dispatches on \code{fit}.
+Applies a \link[=fq_analyzer]{fit} to one section and returns its metrics as a
+single row. Dispatches on \code{fit}.
 }

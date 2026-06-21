@@ -17,6 +17,6 @@ fq_fit(spec, sections, ...)
 An \link{fq_analyzer}.
 }
 \description{
-Fits a \link[=fq_spec]{spec} once on the pooled sections and learns the shared
-basis reused across the batch (fit-once / apply-many). Dispatches on \code{spec}.
+Fits a \link[=fq_spec]{spec} once on the pooled sections and learns a basis that is
+reused to score every section in the batch. Dispatches on \code{spec}.
 }

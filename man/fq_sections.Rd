@@ -14,6 +14,6 @@ An \code{fq_sections} object.
 }
 \description{
 The return type of \code{\link[=fq_split]{fq_split()}}. It extends a list, so it indexes, lengths,
-and iterates like one, while carrying its own \code{\link[=plot]{plot()}} (a contact sheet) and
-\code{\link[=print]{print()}} methods.
+and iterates like one, while carrying its own \code{\link[=plot]{plot()}} method (a contact
+sheet) and \code{\link[=print]{print()}} method.
 }

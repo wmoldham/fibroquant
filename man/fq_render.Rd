@@ -14,9 +14,9 @@ fq_render(fit, section, ...)
 \item{...}{Passed on to methods.}
 }
 \value{
-An H x W severity field, \code{NA} off tissue.
+A severity field with one grade per pixel, \code{NA} off tissue.
 }
 \description{
-Applies a \link[=fq_analyzer]{fit} to one section and returns its per-pixel severity
-field for pseudocolouring. Dispatches on \code{fit}.
+Applies a \link[=fq_analyzer]{fit} to one section and returns a severity grade for
+every pixel, ready for pseudocolouring. Dispatches on \code{fit}.
 }

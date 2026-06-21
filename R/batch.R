@@ -4,15 +4,16 @@
 
 #' Build a manifest of slide files for batch processing
 #'
-#' Scans a directory (or takes an explicit list of paths) for slide files
-#' [fq_read()] can open and returns one row per file. The manifest fixes the set
-#' of slides for a batch and gives each a stable `slide_id` for joining scores
-#' back to their file. Add experimental covariates (treatment, sex, age, ...) as
-#' further columns; [fq_run()] propagates them to the results.
+#' Scans a directory, or takes an explicit vector of paths, for slide files that
+#' [fq_read()] can open, and returns one row per file. The manifest fixes the
+#' set of slides for a batch and gives each a stable `slide_id` for joining
+#' scores back to their file. Add experimental covariates such as treatment,
+#' sex, or age as further columns, and [fq_run()] carries them into the results.
 #'
 #' @param path A directory to scan, or a character vector of slide file paths.
 #' @param recursive Recurse into sub-directories when `path` is a directory.
-#' @param extensions Slide file extensions to match, lower-case, no leading dot.
+#' @param extensions File extensions to match, in lower case, with no leading
+#'   dot.
 #' @return A tibble with one row per slide: `slide_id` (file name without
 #'   extension) and `path` (normalised absolute path), ordered by `path`.
 #' @export
@@ -68,44 +69,46 @@ fq_manifest <- function(
 
 #' Score a folder of slides against one analyzer
 #'
-#' Runs the full pipeline over a manifest: fits the analyzer once on a
-#' representative subsample of slides (or reuses a fit you pass in), then splits
-#' and scores every slide, returning one row per section with the manifest's
-#' covariates joined on. Maps are not produced here -- regenerate any you want
-#' with [fq_render()] from the returned fit and a section.
+#' Runs the full pipeline over a manifest. It fits the analyzer once on a
+#' representative subsample of slides, or reuses a fit you pass in, then splits
+#' and scores every slide. It returns one row per section with the manifest's
+#' covariates joined on. It does not produce severity maps. Generate any you
+#' need with [fq_render()] from the returned fit and a section.
 #'
-#' Parallelism is opt-in and entirely the caller's: set `mirai::daemons(n)` in
-#' your session and the per-slide work runs across those daemons; with no
-#' daemons set it runs sequentially. A real parallel run needs the package
-#' installed (`R CMD INSTALL`), as the daemons load `fibroquant` to score.
+#' Parallelism is optional and controlled by the caller. Set `mirai::daemons(n)`
+#' in your session and the work for each slide runs across those daemons. With
+#' no daemons set it runs sequentially. A parallel run needs the package
+#' installed with `R CMD INSTALL`, because each daemon loads `fibroquant` to
+#' score.
 #'
 #' @param manifest A manifest tibble from [fq_manifest()] (columns `slide_id`,
 #'   `path`, plus any covariates).
-#' @param analyzer An analyzer spec (e.g. [fq_kmeans()]) to fit on the
-#'   subsample, or an already-fitted [fq_analyzer] to apply as-is.
+#' @param analyzer An analyzer spec such as [fq_kmeans()] to fit on the
+#'   subsample, or an already fitted [fq_analyzer] to apply directly.
 #' @param n Number of tissue sections to keep per slide, passed to [fq_split()].
-#' @param close_um Morphological closing radius in microns for [fq_split()];
-#'   bridges alveolar airspace within a section without bridging the gap between
-#'   sections.
-#' @param min_area_frac Minimum connected-component area for [fq_split()], as a
-#'   fraction of the largest; smaller components (debris, scan streaks) are
-#'   dropped.
-#' @param target_um_px Working resolution in microns/pixel for [fq_read()]; the
-#'   nearest level is chosen. Keep it matched between the fit and the scored
-#'   slides so the basis and the data it scores share a resolution.
+#' @param close_um Morphological closing radius in microns, passed to
+#'   [fq_split()]. It bridges alveolar airspace within a section without
+#'   bridging the gap between sections.
+#' @param min_area_frac Minimum area of a connected component for [fq_split()],
+#'   as a fraction of the largest. Smaller components such as debris and scan
+#'   streaks are dropped.
+#' @param target_um_px Working resolution in microns per pixel for [fq_read()].
+#'   The nearest level is chosen. Keep this matched between the fit and the
+#'   scored slides so the basis and the data it scores share a resolution.
 #' @param n_ref Number of slides to subsample for the fit, or `NULL` (default)
-#'   to use every slide. Ignored when `analyzer` is already fitted. The first
-#'   section of each reference slide is pooled, so near-duplicate sections from
-#'   one slide are not double-counted.
+#'   to use every slide. Ignored when `analyzer` is already fitted. Only the
+#'   first section of each reference slide is pooled, so similar sections from
+#'   one slide are not counted twice.
 #' @param stratify Optional manifest column to balance the subsample across,
-#'   e.g. `"treatment"` so the fit spans the injury range.
+#'   such as `"treatment"`, so the fit spans the range of injury.
 #' @param seed Seed for the fit's slide subsample and k-means restarts, for a
 #'   reproducible basis. Scoring is deterministic and needs no seed.
 #' @param progress Show a progress bar that advances as each slide finishes, in
 #'   both sequential and parallel runs. `FALSE` suppresses it.
-#' @return A list with `scores` (one row per section: `slide_id`, `section`,
-#'   `n_sections`, the analyzer's metrics, and the joined covariates) and `fit`
-#'   (the fitted [fq_analyzer], for reuse or rendering).
+#' @return A list with two elements. `scores` has one row per section, with
+#'   columns `slide_id`, `section` (the section label), the analyzer's metrics
+#'   from [fq_score()], and the manifest's covariates joined on. `fit` is the
+#'   fitted [fq_analyzer], for reuse or rendering.
 #' @export
 fq_run <- function(
     manifest,

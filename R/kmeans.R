@@ -18,12 +18,12 @@
 #'   to damp single-pixel stain speckle. The blur is a mask-aware normalised
 #'   convolution, so airspace carries no weight into tissue and cannot bleed
 #'   into the rim. `0` disables smoothing.
-#' @param nstart Number of k-means restarts; the lowest within-cluster
-#'   sum-of-squares fit is kept.
-#' @param max_px Maximum tissue pixels sampled per section when fitting. Caps
-#'   each section's contribution so slides are weighted equally and the fit
-#'   stays tractable on large batches; `Inf` uses every pixel. Sampling is
-#'   random, so set a seed for a reproducible fit.
+#' @param nstart Number of k-means restarts. The fit with the lowest
+#'   within-cluster sum of squares is kept.
+#' @param max_px Maximum number of tissue pixels sampled per section when
+#'   fitting. This caps each section's contribution so sections are weighted
+#'   equally and the fit stays tractable on large batches. `Inf` uses every
+#'   pixel. Sampling is random, so set a seed for a reproducible fit.
 #' @return An `fq_kmeans` spec.
 #' @export
 fq_kmeans <-

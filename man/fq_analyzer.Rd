@@ -7,8 +7,8 @@
 fq_analyzer()
 }
 \description{
-Abstract parent of the fitted-analyzer objects returned by \code{\link[=fq_fit]{fq_fit()}}. A fit
-pairs a spec with the basis learned from a batch of sections -- cluster
-centres, severity ordering, thresholds -- and is the input to \code{\link[=fq_score]{fq_score()}}
+Abstract parent of the fitted analyzer objects returned by \code{\link[=fq_fit]{fq_fit()}}. A fit
+pairs a spec with the basis learned from a batch of sections, such as cluster
+centres, a severity ordering, and thresholds. It is the input to \code{\link[=fq_score]{fq_score()}}
 and \code{\link[=fq_render]{fq_render()}}.
 }

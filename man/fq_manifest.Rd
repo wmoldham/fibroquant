@@ -15,16 +15,17 @@ fq_manifest(
 
 \item{recursive}{Recurse into sub-directories when \code{path} is a directory.}
 
-\item{extensions}{Slide file extensions to match, lower-case, no leading dot.}
+\item{extensions}{File extensions to match, in lower case, with no leading
+dot.}
 }
 \value{
 A tibble with one row per slide: \code{slide_id} (file name without
 extension) and \code{path} (normalised absolute path), ordered by \code{path}.
 }
 \description{
-Scans a directory (or takes an explicit list of paths) for slide files
-\code{\link[=fq_read]{fq_read()}} can open and returns one row per file. The manifest fixes the set
-of slides for a batch and gives each a stable \code{slide_id} for joining scores
-back to their file. Add experimental covariates (treatment, sex, age, ...) as
-further columns; \code{\link[=fq_run]{fq_run()}} propagates them to the results.
+Scans a directory, or takes an explicit vector of paths, for slide files that
+\code{\link[=fq_read]{fq_read()}} can open, and returns one row per file. The manifest fixes the
+set of slides for a batch and gives each a stable \code{slide_id} for joining
+scores back to their file. Add experimental covariates such as treatment,
+sex, or age as further columns, and \code{\link[=fq_run]{fq_run()}} carries them into the results.
 }

@@ -12,7 +12,7 @@
 #'
 #' @param slide An [fq_slide] from [fq_read()].
 #' @param n Number of sections to keep (largest by area).
-#' @param close_um Morphological closing radius in microns; bridges airspace
+#' @param close_um Morphological closing radius in microns. It bridges airspace
 #'   within a section without bridging the gap between sections.
 #' @param min_area_frac Drop components smaller than this fraction of the
 #'   largest, so debris and scan artifacts are ignored.

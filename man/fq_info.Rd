@@ -10,14 +10,15 @@ fq_info(path)
 \item{path}{Path to a slide file readable by \code{RBioFormats} (e.g. \code{.vsi}).}
 }
 \value{
-A tibble with columns \code{series}, \code{res}, \code{size_x}, \code{size_y}, \code{um_px},
-one row per resolution level. The finest level (\code{res == 1}) carries the
-native physical pixel size in \code{um_px}.
+A tibble with one row per resolution level and columns \code{series},
+\code{res} (the level, where 1 is finest), \code{size_x} and \code{size_y} (pixel
+dimensions), and \code{um_px} (effective microns per pixel). At the finest level
+(\code{res == 1}), \code{um_px} is the native physical pixel size.
 }
 \description{
-Whole-slide formats such as Olympus \code{.vsi} pack several images (a label, a
-tissue overview, the high-resolution scan, a macro), and the scan itself is
-stored as a pyramid of resolution levels. This returns one row per
-(series, level) with its pixel dimensions and effective microns-per-pixel, so
-\code{\link[=fq_read]{fq_read()}} can choose the scan series and a working resolution.
+Whole-slide formats such as Olympus \code{.vsi} pack several images, including a
+label, a tissue overview, the full-resolution scan, and a macro image. The
+scan itself is stored as a pyramid of resolution levels. This returns one row
+per series and level, with its pixel dimensions and effective microns per
+pixel, so \code{\link[=fq_read]{fq_read()}} can choose the scan series and a working resolution.
 }

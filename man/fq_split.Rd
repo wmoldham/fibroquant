@@ -11,7 +11,7 @@ fq_split(slide, n = 2, close_um = 50, min_area_frac = 0.05)
 
 \item{n}{Number of sections to keep (largest by area).}
 
-\item{close_um}{Morphological closing radius in microns; bridges airspace
+\item{close_um}{Morphological closing radius in microns. It bridges airspace
 within a section without bridging the gap between sections.}
 
 \item{min_area_frac}{Drop components smaller than this fraction of the
@@ -23,8 +23,8 @@ right).
 }
 \description{
 Lung slides routinely carry several sections side by side. This finds them by
-connected components -- consolidating each porous section into a solid blob so
-alveolar airspace does not fragment it -- and returns one cropped \link{fq_section}
+connected components, consolidating each porous section into a solid blob so
+alveolar airspace does not fragment it, and returns a cropped \link{fq_section}
 per section, ordered along the first spatial axis (left to right for a wide
 strip).
 }

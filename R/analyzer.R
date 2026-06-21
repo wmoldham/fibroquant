@@ -4,9 +4,9 @@
 
 #' Analyzer specification
 #'
-#' Abstract parent of the analyzer specs. A spec is the recipe -- which analyzer
-#' to run and its hyperparameters -- and holds no fitted state. Construct a
-#' concrete spec with a family constructor such as `fq_kmeans()`.
+#' Abstract parent of the analyzer specs. A spec records which analyzer to run
+#' and its hyperparameters. It holds no fitted state. Construct a concrete spec
+#' with a constructor such as `fq_kmeans()`.
 #'
 #' @export
 fq_spec <-
@@ -17,9 +17,9 @@ fq_spec <-
 
 #' Fitted analyzer
 #'
-#' Abstract parent of the fitted-analyzer objects returned by [fq_fit()]. A fit
-#' pairs a spec with the basis learned from a batch of sections -- cluster
-#' centres, severity ordering, thresholds -- and is the input to [fq_score()]
+#' Abstract parent of the fitted analyzer objects returned by [fq_fit()]. A fit
+#' pairs a spec with the basis learned from a batch of sections, such as cluster
+#' centres, a severity ordering, and thresholds. It is the input to [fq_score()]
 #' and [fq_render()].
 #'
 #' @export
@@ -33,8 +33,8 @@ fq_analyzer <-
 
 #' Fit an analyzer on a batch of sections
 #'
-#' Fits a [spec][fq_spec] once on the pooled sections and learns the shared
-#' basis reused across the batch (fit-once / apply-many). Dispatches on `spec`.
+#' Fits a [spec][fq_spec] once on the pooled sections and learns a basis that is
+#' reused to score every section in the batch. Dispatches on `spec`.
 #'
 #' @param spec An analyzer spec, e.g. `fq_kmeans()`.
 #' @param sections A list of `fq_section`s (or an `fq_sections`).
@@ -48,8 +48,8 @@ fq_fit <-
 
 #' Score a section against a fitted analyzer
 #'
-#' Applies a [fit][fq_analyzer] to one section and returns its per-section
-#' metrics. Dispatches on `fit`.
+#' Applies a [fit][fq_analyzer] to one section and returns its metrics as a
+#' single row. Dispatches on `fit`.
 #'
 #' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.
@@ -63,13 +63,13 @@ fq_score <-
 
 #' Render a section's severity field
 #'
-#' Applies a [fit][fq_analyzer] to one section and returns its severity field
-#' per pixel, for pseudocolouring. Dispatches on `fit`.
+#' Applies a [fit][fq_analyzer] to one section and returns a severity grade for
+#' every pixel, ready for pseudocolouring. Dispatches on `fit`.
 #'
 #' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.
 #' @param ... Passed on to methods.
-#' @return An H x W severity field, `NA` off tissue.
+#' @return A severity field with one grade per pixel, `NA` off tissue.
 #' @export
 fq_render <-
   S7::new_generic("fq_render", "fit", function(fit, section, ...) {

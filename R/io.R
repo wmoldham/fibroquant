@@ -4,16 +4,17 @@
 
 #' Tabulate the image series and resolution levels in a slide file
 #'
-#' Whole-slide formats such as Olympus `.vsi` pack several images (a label, a
-#' tissue overview, the high-resolution scan, a macro), and the scan itself is
-#' stored as a pyramid of resolution levels. This returns one row per
-#' (series, level) with its pixel dimensions and effective microns-per-pixel, so
-#' [fq_read()] can choose the scan series and a working resolution.
+#' Whole-slide formats such as Olympus `.vsi` pack several images, including a
+#' label, a tissue overview, the full-resolution scan, and a macro image. The
+#' scan itself is stored as a pyramid of resolution levels. This returns one row
+#' per series and level, with its pixel dimensions and effective microns per
+#' pixel, so [fq_read()] can choose the scan series and a working resolution.
 #'
 #' @param path Path to a slide file readable by `RBioFormats` (e.g. `.vsi`).
-#' @return A tibble with columns `series`, `res`, `size_x`, `size_y`, `um_px`,
-#'   one row per resolution level. The finest level (`res == 1`) carries the
-#'   native physical pixel size in `um_px`.
+#' @return A tibble with one row per resolution level and columns `series`,
+#'   `res` (the level, where 1 is finest), `size_x` and `size_y` (pixel
+#'   dimensions), and `um_px` (effective microns per pixel). At the finest level
+#'   (`res == 1`), `um_px` is the native physical pixel size.
 #' @export
 fq_info <- function(path) {
   .info_table(RBioFormats::read.metadata(path))
@@ -122,17 +123,20 @@ fq_info <- function(path) {
   arr[, , seq_len(3L), drop = FALSE]
 }
 
-#' Read a slide at an analysis-appropriate resolution
+#' Read a slide at a working resolution
 #'
 #' Reads a whole-slide image into an [fq_slide]. For formats `RBioFormats`
-#' handles (e.g. `.vsi`) it selects the scan series and the resolution level
-#' nearest `target_um_px`; TIFF/PNG/JPEG are read directly by EBImage as a
+#' handles, such as `.vsi`, it selects the scan series and the resolution level
+#' nearest `target_um_px`. TIFF, PNG, and JPEG are read directly by EBImage as a
 #' single, uncalibrated level.
 #'
 #' @param path Path to a slide file.
-#' @param series Series index; `NULL` auto-selects the scan (largest by area).
-#' @param target_um_px Desired microns/pixel; the nearest level is chosen.
-#' @param resolution Explicit level; overrides `target_um_px`.
+#' @param series Series index. `NULL` selects the scan series automatically, the
+#'   one largest by area.
+#' @param target_um_px Desired microns per pixel. The level nearest this value
+#'   is chosen.
+#' @param resolution An explicit resolution level. Overrides `target_um_px` when
+#'   given.
 #' @return An [fq_slide].
 #' @export
 fq_read <- function(

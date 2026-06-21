@@ -21,30 +21,30 @@ fq_run(
 \item{manifest}{A manifest tibble from \code{\link[=fq_manifest]{fq_manifest()}} (columns \code{slide_id},
 \code{path}, plus any covariates).}
 
-\item{analyzer}{An analyzer spec (e.g. \code{\link[=fq_kmeans]{fq_kmeans()}}) to fit on the
-subsample, or an already-fitted \link{fq_analyzer} to apply as-is.}
+\item{analyzer}{An analyzer spec such as \code{\link[=fq_kmeans]{fq_kmeans()}} to fit on the
+subsample, or an already fitted \link{fq_analyzer} to apply directly.}
 
 \item{n}{Number of tissue sections to keep per slide, passed to \code{\link[=fq_split]{fq_split()}}.}
 
-\item{close_um}{Morphological closing radius in microns for \code{\link[=fq_split]{fq_split()}};
-bridges alveolar airspace within a section without bridging the gap between
-sections.}
+\item{close_um}{Morphological closing radius in microns, passed to
+\code{\link[=fq_split]{fq_split()}}. It bridges alveolar airspace within a section without
+bridging the gap between sections.}
 
-\item{min_area_frac}{Minimum connected-component area for \code{\link[=fq_split]{fq_split()}}, as a
-fraction of the largest; smaller components (debris, scan streaks) are
-dropped.}
+\item{min_area_frac}{Minimum area of a connected component for \code{\link[=fq_split]{fq_split()}},
+as a fraction of the largest. Smaller components such as debris and scan
+streaks are dropped.}
 
-\item{target_um_px}{Working resolution in microns/pixel for \code{\link[=fq_read]{fq_read()}}; the
-nearest level is chosen. Keep it matched between the fit and the scored
-slides so the basis and the data it scores share a resolution.}
+\item{target_um_px}{Working resolution in microns per pixel for \code{\link[=fq_read]{fq_read()}}.
+The nearest level is chosen. Keep this matched between the fit and the
+scored slides so the basis and the data it scores share a resolution.}
 
-\item{n_ref}{Number of slides to subsample for the fit, or \code{NULL} (default) to
-use every slide. Ignored when \code{analyzer} is already fitted. The first
-section of each reference slide is pooled, so near-duplicate sections from
-one slide are not double-counted.}
+\item{n_ref}{Number of slides to subsample for the fit, or \code{NULL} (default)
+to use every slide. Ignored when \code{analyzer} is already fitted. Only the
+first section of each reference slide is pooled, so similar sections from
+one slide are not counted twice.}
 
 \item{stratify}{Optional manifest column to balance the subsample across,
-e.g. \code{"treatment"} so the fit spans the injury range.}
+such as \code{"treatment"}, so the fit spans the range of injury.}
 
 \item{seed}{Seed for the fit's slide subsample and k-means restarts, for a
 reproducible basis. Scoring is deterministic and needs no seed.}
@@ -53,20 +53,22 @@ reproducible basis. Scoring is deterministic and needs no seed.}
 both sequential and parallel runs. \code{FALSE} suppresses it.}
 }
 \value{
-A list with \code{scores} (one row per section: \code{slide_id}, \code{section},
-\code{n_sections}, the analyzer's metrics, and the joined covariates) and \code{fit}
-(the fitted \link{fq_analyzer}, for reuse or rendering).
+A list with two elements. \code{scores} has one row per section, with
+columns \code{slide_id}, \code{section} (the section label), the analyzer's metrics
+from \code{\link[=fq_score]{fq_score()}}, and the manifest's covariates joined on. \code{fit} is the
+fitted \link{fq_analyzer}, for reuse or rendering.
 }
 \description{
-Runs the full pipeline over a manifest: fits the analyzer once on a
-representative subsample of slides (or reuses a fit you pass in), then splits
-and scores every slide, returning one row per section with the manifest's
-covariates joined on. Maps are not produced here -- regenerate any you want
-with \code{\link[=fq_render]{fq_render()}} from the returned fit and a section.
+Runs the full pipeline over a manifest. It fits the analyzer once on a
+representative subsample of slides, or reuses a fit you pass in, then splits
+and scores every slide. It returns one row per section with the manifest's
+covariates joined on. It does not produce severity maps. Generate any you
+need with \code{\link[=fq_render]{fq_render()}} from the returned fit and a section.
 }
 \details{
-Parallelism is opt-in and entirely the caller's: set \code{mirai::daemons(n)} in
-your session and the per-slide work runs across those daemons; with no
-daemons set it runs sequentially. A real parallel run needs the package
-installed (\verb{R CMD INSTALL}), as the daemons load \code{fibroquant} to score.
+Parallelism is optional and controlled by the caller. Set \code{mirai::daemons(n)}
+in your session and the work for each slide runs across those daemons. With
+no daemons set it runs sequentially. A parallel run needs the package
+installed with \verb{R CMD INSTALL}, because each daemon loads \code{fibroquant} to
+score.
 }

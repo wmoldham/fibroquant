@@ -7,7 +7,7 @@
 fq_spec()
 }
 \description{
-Abstract parent of the analyzer specs. A spec is the recipe -- which analyzer
-to run and its hyperparameters -- and holds no fitted state. Construct a
-concrete spec with a family constructor such as \code{fq_kmeans()}.
+Abstract parent of the analyzer specs. A spec records which analyzer to run
+and its hyperparameters. It holds no fitted state. Construct a concrete spec
+with a constructor such as \code{fq_kmeans()}.
 }

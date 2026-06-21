@@ -17,29 +17,33 @@ fq_section(
 \arguments{
 \item{rgb}{Pixel data, a height x width x 3 numeric array in \verb{[0, 1]}.}
 
-\item{um_per_px}{Physical scale in microns per pixel; \code{NA} if uncalibrated.}
+\item{um_per_px}{Physical scale in microns per pixel. \code{NA} if uncalibrated.}
 
-\item{source}{A list of provenance (path, format, series, resolution, native
-microns/pixel, dims) describing where this image came from.}
+\item{source}{A named list of provenance describing where the image came
+from, with entries such as path, format, series, resolution, native microns
+per pixel, and dimensions.}
 
-\item{mask}{Logical analysis mask, the same height x width as \code{rgb}:
-foreground tissue with airway and other whitespace lumen excluded. The
-denominator for density and the pixel pool for clustering.}
+\item{mask}{Logical analysis mask, the same height and width as \code{rgb}. \code{TRUE}
+marks foreground tissue and excludes the airway and other bright lumen.
+This is the denominator for tissue density and the pool of pixels for
+clustering.}
 
-\item{bbox}{The crop box in parent coordinates, a list with \code{rows} and \code{cols}.}
+\item{bbox}{The crop box in the parent scan's coordinates, a list with \code{rows}
+and \code{cols}, each a length 2 range.}
 
 \item{section}{The section label, e.g. \code{"A"} or \code{"B"}.}
 
-\item{footprint}{Logical section silhouette, the same height x width as \code{rgb}:
-the filled connected component that sets the crop box and the outline.
-Defaults to \code{mask} when a section has no distinct silhouette.}
+\item{footprint}{Logical section silhouette, the same height and width as
+\code{rgb}. This is the filled connected component that sets the crop box and
+the drawn outline. It defaults to \code{mask} when a section has no distinct
+silhouette.}
 }
 \value{
 An \code{fq_section} object.
 }
 \description{
-One lung section extracted by \code{\link[=fq_split]{fq_split()}}. Inherits everything from
+One lung section extracted by \code{\link[=fq_split]{fq_split()}}. It inherits everything from
 \link{fq_slide} and adds the analysis mask, the filled silhouette, and the crop
-provenance, so a section carries both its pixels and where it sat in the
-parent scan.
+location, so a section carries both its pixels and where it sat in the parent
+scan.
 }

@@ -4,14 +4,15 @@
 
 #' A whole-slide scan
 #'
-#' The core `fibroquant` object: a normalised RGB scan, its physical scale, and
-#' the provenance needed to reproduce it. Every analyzer consumes an `fq_slide`
-#' (or an [fq_section]).
+#' The core `fibroquant` object. It holds a normalised RGB scan, its physical
+#' scale, and the provenance needed to reproduce it. Every analyzer operates on
+#' an `fq_slide` or an [fq_section].
 #'
 #' @param rgb Pixel data, a height x width x 3 numeric array in `[0, 1]`.
-#' @param um_per_px Physical scale in microns per pixel; `NA` if uncalibrated.
-#' @param source A list of provenance (path, format, series, resolution, native
-#'   microns/pixel, dims) describing where this image came from.
+#' @param um_per_px Physical scale in microns per pixel. `NA` if uncalibrated.
+#' @param source A named list of provenance describing where the image came
+#'   from, with entries such as path, format, series, resolution, native microns
+#'   per pixel, and dimensions.
 #' @return An `fq_slide` object.
 #' @export
 fq_slide <-
@@ -35,19 +36,22 @@ fq_slide <-
 
 #' A single tissue section cropped from a slide
 #'
-#' One lung section extracted by [fq_split()]. Inherits everything from
+#' One lung section extracted by [fq_split()]. It inherits everything from
 #' [fq_slide] and adds the analysis mask, the filled silhouette, and the crop
-#' provenance, so a section carries both its pixels and where it sat in the
-#' parent scan.
+#' location, so a section carries both its pixels and where it sat in the parent
+#' scan.
 #'
 #' @inheritParams fq_slide
-#' @param mask Logical analysis mask, the same height x width as `rgb`:
-#'   foreground tissue with airway and other whitespace lumen excluded. The
-#'   denominator for density and the pixel pool for clustering.
-#' @param footprint Logical section silhouette, same height x width as `rgb`:
-#'   the filled connected component that sets the crop box and the outline.
-#'   Defaults to `mask` when a section has no distinct silhouette.
-#' @param bbox The crop box in parent coordinates, with `rows` and `cols`.
+#' @param mask Logical analysis mask, the same height and width as `rgb`. `TRUE`
+#'   marks foreground tissue and excludes the airway and other bright lumen.
+#'   This is the denominator for tissue density and the pool of pixels for
+#'   clustering.
+#' @param footprint Logical section silhouette, the same height and width as
+#'   `rgb`. This is the filled connected component that sets the crop box and
+#'   the drawn outline. It defaults to `mask` when a section has no distinct
+#'   silhouette.
+#' @param bbox The crop box in the parent scan's coordinates, a list with `rows`
+#'   and `cols`, each a length 2 range.
 #' @param section The section label, e.g. `"A"` or `"B"`.
 #' @return An `fq_section` object.
 #' @export
@@ -146,8 +150,8 @@ S7::method(print, fq_slide) <- function(x, ...) {
 #' A collection of tissue sections from one slide
 #'
 #' The return type of [fq_split()]. It extends a list, so it indexes, lengths,
-#' and iterates like one, while carrying its own [plot()] (a contact sheet) and
-#' [print()] methods.
+#' and iterates like one, while carrying its own [plot()] method (a contact
+#' sheet) and [print()] method.
 #'
 #' @param sections A list of [fq_section] objects.
 #' @return An `fq_sections` object.
