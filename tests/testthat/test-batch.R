@@ -130,3 +130,55 @@ test_that("fq_run leaves the caller's RNG untouched", {
   fq_run(manifest, fq_kmeans(k = 3), n_ref = 2)
   expect_identical(.Random.seed, before)
 })
+
+# .sample_reference ------------------------------------------------------------
+
+test_that(".allocate_budget spreads a budget evenly and respects caps", {
+  set.seed(1)
+  expect_equal(.allocate_budget(rep(10L, 3), 12), c(4L, 4L, 4L))
+
+  # A budget below the group count gives one slide each to a subset.
+  expect_equal(sum(.allocate_budget(rep(1L, 32), 25)), 25L)
+
+  # Small groups cap out and the remainder spills to roomier ones.
+  capped <- .allocate_budget(c(1L, 1L, 10L), 6)
+  expect_equal(sum(capped), 6L)
+  expect_true(all(capped <= c(1L, 1L, 10L)))
+  expect_equal(capped[1:2], c(1L, 1L))
+})
+
+test_that(".sample_reference spreads a stratified budget and caps the total", {
+  manifest <- tibble::tibble(
+    slide_id = paste0("s", 1:30),
+    path = paste0("s", 1:30, ".png"),
+    grp = rep(c("a", "b", "c"), each = 10)
+  )
+  set.seed(1)
+  ref <- .sample_reference(manifest, n_ref = 12, stratify = "grp")
+  expect_equal(nrow(ref), 12L)
+  expect_equal(as.integer(table(ref$grp)), c(4L, 4L, 4L))
+})
+
+test_that(".sample_reference covers a random subset when strata exceed it", {
+  manifest <- tibble::tibble(
+    slide_id = paste0("s", 1:32),
+    path = paste0("s", 1:32, ".png"),
+    grp = paste0("g", 1:32)
+  )
+  set.seed(1)
+  expect_message(
+    ref <- .sample_reference(manifest, n_ref = 25, stratify = "grp"),
+    "fewer than"
+  )
+  expect_equal(nrow(ref), 25L)
+  expect_equal(anyDuplicated(ref$grp), 0L)
+})
+
+test_that(".sample_reference uses every slide when the budget covers them", {
+  manifest <- tibble::tibble(
+    slide_id = paste0("s", 1:5),
+    path = paste0("s", 1:5, ".png")
+  )
+  expect_equal(nrow(.sample_reference(manifest, 25, NULL)), 5L)
+  expect_equal(nrow(.sample_reference(manifest, NULL, NULL)), 5L)
+})

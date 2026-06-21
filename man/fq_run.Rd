@@ -11,7 +11,7 @@ fq_run(
   close_um = 50,
   min_area_frac = 0.05,
   target_um_px = 4,
-  n_ref = NULL,
+  n_ref = 25,
   stratify = NULL,
   seed = 1,
   progress = TRUE
@@ -38,13 +38,17 @@ streaks are dropped.}
 The nearest level is chosen. Keep this matched between the fit and the
 scored slides so the basis and the data it scores share a resolution.}
 
-\item{n_ref}{Number of slides to subsample for the fit, or \code{NULL} (default)
-to use every slide. Ignored when \code{analyzer} is already fitted. Only the
-first section of each reference slide is pooled, so similar sections from
-one slide are not counted twice.}
+\item{n_ref}{Total number of slides to subsample for the fit (default 25), or
+\code{Inf}/\code{NULL} to use every slide. This budget bounds the read-and-split cost
+of fitting. Ignored when \code{analyzer} is already fitted. Only the first
+section of each reference slide is pooled, so similar sections from one
+slide are not counted twice.}
 
 \item{stratify}{Optional manifest column to balance the subsample across,
-such as \code{"treatment"}, so the fit spans the range of injury.}
+such as \code{"treatment"}, so the fit spans the range of injury. The \code{n_ref}
+budget is spread as evenly as possible across the column's groups. When
+there are more groups than \code{n_ref}, a random \code{n_ref} of them are used, one
+slide each.}
 
 \item{seed}{Seed for the fit's slide subsample and k-means restarts, for a
 reproducible basis. Scoring is deterministic and needs no seed.}

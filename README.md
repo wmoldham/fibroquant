@@ -263,7 +263,9 @@ manifest
 `fq_run()` fits the analyzer once on a representative subsample of the
 slides, then splits and scores every slide on that shared basis. It
 returns the per-section `scores` table with covariates joined on, and
-the `fit` itself.
+the `fit` itself. By default it fits on up to 25 slides; pass `stratify`
+to spread that budget across a covariate, for example
+`stratify = "treatment"`, so the basis spans the range of injury.
 
 ``` r
 result <- fq_run(manifest, fq_kmeans(k = 3), progress = FALSE)

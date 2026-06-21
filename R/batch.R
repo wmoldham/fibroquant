@@ -96,12 +96,16 @@ fq_manifest <- function(
 #' @param target_um_px Working resolution in microns per pixel for [fq_read()].
 #'   The nearest level is chosen. Keep this matched between the fit and the
 #'   scored slides so the basis and the data it scores share a resolution.
-#' @param n_ref Number of slides to subsample for the fit, or `NULL` (default)
-#'   to use every slide. Ignored when `analyzer` is already fitted. Only the
-#'   first section of each reference slide is pooled, so similar sections from
-#'   one slide are not counted twice.
+#' @param n_ref Total number of slides to subsample for the fit (default 25), or
+#'   `Inf`/`NULL` to use every slide. This budget bounds the read-and-split cost
+#'   of fitting. Ignored when `analyzer` is already fitted. Only the first
+#'   section of each reference slide is pooled, so similar sections from one
+#'   slide are not counted twice.
 #' @param stratify Optional manifest column to balance the subsample across,
-#'   such as `"treatment"`, so the fit spans the range of injury.
+#'   such as `"treatment"`, so the fit spans the range of injury. The `n_ref`
+#'   budget is spread as evenly as possible across the column's groups. When
+#'   there are more groups than `n_ref`, a random `n_ref` of them are used, one
+#'   slide each.
 #' @param seed Seed for the fit's slide subsample and k-means restarts, for a
 #'   reproducible basis. Scoring is deterministic and needs no seed.
 #' @param progress Show a progress bar that advances as each slide finishes, in
@@ -118,7 +122,7 @@ fq_run <- function(
     close_um = 50,
     min_area_frac = 0.05,
     target_um_px = 4,
-    n_ref = NULL,
+    n_ref = 25,
     stratify = NULL,
     seed = 1,
     progress = TRUE
@@ -291,30 +295,57 @@ fq_run <- function(
   })
 }
 
-# Choose the reference slides for the fit. Use all of them when n_ref covers the
-# set, otherwise a random draw, or an even draw across the strata of one column.
+# Choose the reference slides for the fit. Use all of them when the budget
+# covers the set. Otherwise draw n_ref at random, or spread n_ref as evenly as
+# possible across the strata of one column, capping the total either way.
 .sample_reference <- function(manifest, n_ref, stratify) {
   n_slides <- nrow(manifest)
   if (is.null(n_ref) || n_ref >= n_slides) {
     return(manifest)
   }
   if (is.null(stratify)) {
-    rows <- sort(sample.int(n_slides, n_ref))
-    return(manifest[rows, , drop = FALSE])
+    return(manifest[sort(sample.int(n_slides, n_ref)), , drop = FALSE])
   }
   if (!stratify %in% names(manifest)) {
     stop("`stratify` column not found in manifest: ", stratify, call. = FALSE)
   }
 
   groups <- split(seq_len(n_slides), manifest[[stratify]])
-  per <- max(1L, floor(n_ref / length(groups)))
+  if (n_ref < length(groups)) {
+    message(
+      "n_ref (", n_ref, ") is fewer than the ", length(groups),
+      " strata; fitting on a random ", n_ref, " of them."
+    )
+  }
+  alloc <- .allocate_budget(lengths(groups), n_ref)
   picked <-
     unlist(
-      lapply(
+      Map(
+        function(rows, k) if (k >= length(rows)) rows else sample(rows, k),
         groups,
-        function(g) if (length(g) <= per) g else sample(g, per)
+        alloc
       ),
       use.names = FALSE
     )
   manifest[sort(picked), , drop = FALSE]
+}
+
+# Spread a total budget across groups as evenly as their sizes allow. Fill the
+# least-filled groups first, breaking ties at random, until the budget is spent.
+# When the budget is smaller than the group count, a random subset of groups
+# each get one. Assumes budget is less than the total of sizes.
+.allocate_budget <- function(sizes, budget) {
+  alloc <- integer(length(sizes))
+  while (budget > 0) {
+    open <- which(alloc < sizes)
+    least <- open[alloc[open] == min(alloc[open])]
+    if (length(least) > 1) {
+      least <- sample(least)
+    }
+    take <- min(length(least), budget)
+    winners <- least[seq_len(take)]
+    alloc[winners] <- alloc[winners] + 1L
+    budget <- budget - take
+  }
+  alloc
 }
