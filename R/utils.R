@@ -1,7 +1,7 @@
 # utils.R
 
-# Foreground (tissue) mask: luminance below an Otsu threshold. Tissue absorbs
-# light; glass and airspace are bright.
+# Tissue mask: pixels darker than an Otsu threshold. Tissue absorbs light.
+# Glass and airspace stay bright.
 .tissue_mask <- function(rgb) {
   luminance <- (rgb[, , 1] + rgb[, , 2] + rgb[, , 3]) / 3
   threshold <-

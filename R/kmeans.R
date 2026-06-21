@@ -108,9 +108,9 @@ fq_field <-
 
 # Internal helpers -------------------------------------------------------------
 
-# Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
-# pixels; 0 leaves the image unchanged. With a mask, blur as a normalised
-# convolution so off-mask pixels (airspace) carry no weight into masked tissue.
+# Gaussian blur each RGB channel to damp stain speckle. sigma is in pixels.
+# 0 leaves the image unchanged. With a mask, blur as a normalised convolution
+# so airspace carries no weight into masked tissue.
 .smooth <- function(rgb, sigma, mask = NULL) {
   if (sigma <= 0) {
     return(rgb)
@@ -136,13 +136,13 @@ fq_field <-
       sigma = sigma
     )
     smoothed <- blurred / weight
-    smoothed[!mask] <- rgb[, , ch][!mask]  # off-tissue is unused; avoid 0/0
+    smoothed[!mask] <- rgb[, , ch][!mask]  # off mask is unused. avoid 0/0
     out[, , ch] <- smoothed
   }
   out
 }
 
-# Convert sRGB to CIELAB pixelwise; returns an H x W x 3 array of L*, a*, b*.
+# Convert sRGB to CIELAB. Returns an H x W x 3 array of L*, a*, b*.
 .lab <- function(rgb) {
   flat <- matrix(rgb, ncol = 3)
   lab <- grDevices::convertColor(flat, from = "sRGB", to = "Lab")
@@ -152,8 +152,8 @@ fq_field <-
   )
 }
 
-# Select the chosen CIELAB channels at masked tissue pixels into an N x m
-# matrix: rows are tissue pixels, columns are the requested channels.
+# Select the chosen CIELAB channels at masked pixels. Returns an N x m matrix.
+# Rows are pixels. Columns are the requested channels.
 .features <- function(lab, mask, channels) {
   idx <- match(channels, c("L", "a", "b"))
   flat <- matrix(lab[, , idx], ncol = length(idx))
@@ -162,8 +162,9 @@ fq_field <-
   out
 }
 
-# Severity grade of each masked tissue pixel: the nearest centre row, which is
-# already in severity order. Returns a grade per pixel in column-major order.
+# Severity grade of each masked pixel: the nearest centre row. Centre rows are
+# already in severity order. Returns one grade per pixel, ordered as the mask
+# indexes them.
 .assign <- function(section, fit) {
   spec <- fit@spec
   lab <- .lab(.smooth(section@rgb, spec@smooth_sigma, section@mask))
@@ -174,15 +175,15 @@ fq_field <-
     function(g) rowSums(sweep(x, 2, centers[g, ])^2),
     numeric(nrow(x))
   )
-  max.col(-d, ties.method = "first")
+  max.col(-d, ties.method = "first") # max of negated distance picks the nearest
 }
 
 # Methods ----------------------------------------------------------------------
 
-# Pool masked tissue pixels across sections, k-means on the chosen channels,
-# then order clusters by descending mean L* so centre row i is severity grade i.
-# Each section is capped to spec@max_px pixels before pooling, so a large
-# section cannot outweigh a small one and the fit stays tractable.
+# Pool masked pixels across sections and cluster the chosen channels. Order the
+# clusters by descending mean L* so centre row i is severity grade i. Cap each
+# section to spec@max_px pixels first so one large section cannot dominate and
+# the fit stays tractable.
 S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
   prepped <- lapply(sections, function(s) {
     lab <- .lab(.smooth(s@rgb, spec@smooth_sigma, s@mask))
@@ -217,8 +218,8 @@ S7::method(fq_fit, fq_kmeans) <- function(spec, sections, ...) {
   )
 }
 
-# Per-section metrics: area fraction in each grade, plus an area-weighted
-# severity index on 0 (all mildest) to 10 (all most severe).
+# Metrics for one section: the area fraction in each grade and a severity index
+# weighted by area, from 0 (all mildest) to 10 (all most severe).
 S7::method(fq_score, fq_kmeans_analyzer) <- function(fit, section, ...) {
   grade <- .assign(section, fit)
   k <- nrow(fit@centers)
@@ -230,7 +231,7 @@ S7::method(fq_score, fq_kmeans_analyzer) <- function(fit, section, ...) {
   tibble::as_tibble(cols)
 }
 
-# Per-pixel severity field: each tissue pixel's grade in place, NA off tissue.
+# Severity field: each tissue pixel's grade in place, NA off tissue.
 S7::method(fq_render, fq_kmeans_analyzer) <- function(fit, section, ...) {
   grade <- .assign(section, fit)
   field <- array(NA_real_, dim = dim(section@mask))

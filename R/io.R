@@ -35,8 +35,8 @@ fq_info <- function(path) {
     )
   }
 
-  # Normalise to 1-based in case these fields arrive 0-based: series
-  # globally, level within each series.
+  # Normalise indices to start at 1 in case they arrive 0 based. Series is
+  # global. Level resets within each series.
   series <- field("series")
   series <- series - min(series) + 1L
 
@@ -55,8 +55,8 @@ fq_info <- function(path) {
       size_y = field("sizeY")
     )
 
-  # A coarser level's um/px is the native size scaled by its downsampling,
-  # full_x / size_x, taken within each series.
+  # A coarser level's um/px is the native scale times its downsampling,
+  # full_x / size_x, within each series.
   full_um <- .physical_um_per_px(meta)
   tab$um_px <- NA_real_
   for (s in unique(tab$series)) {
@@ -68,8 +68,8 @@ fq_info <- function(path) {
   tab[order(tab$series, tab$res), ]
 }
 
-# Parse the full-resolution physical pixel size (x, microns) from the global
-# metadata, skipping series that lack it.
+# Parse the physical pixel size (x, in microns) from the global metadata.
+# Skip series that lack it.
 .physical_um_per_px <- function(meta) {
   for (m in meta) {
     gm <- m$globalMetadata
@@ -92,8 +92,8 @@ fq_info <- function(path) {
 
 # fq_read ----------------------------------------------------------------------
 
-# Series with the largest pixel area is the high-resolution scan. as.numeric
-# guards against 32-bit integer overflow on whole-slide pixel counts.
+# The series with the largest pixel area is the scan. as.numeric guards against
+# integer overflow on the pixel counts.
 .pick_scan_series <- function(info) {
   (as.numeric(info$size_x) * as.numeric(info$size_y)) |>
     tapply(info$series, max) |>
@@ -108,8 +108,8 @@ fq_info <- function(path) {
   sub$res[which.min(abs(sub$um_px - target_um_px))]
 }
 
-# Coerce an RBioFormats or EBImage image to a plain height x width x 3 array in
-# [0, 1], replicating a single channel to RGB and dropping any alpha channel.
+# Coerce an RBioFormats or EBImage image to an H x W x 3 array in [0, 1].
+# Replicate a single channel to RGB. Drop any alpha channel.
 .as_rgb_array <- function(img) {
   arr <- as.array(EBImage::imageData(img))
   if (length(dim(arr)) == 2L) {

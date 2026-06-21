@@ -1,7 +1,7 @@
 # helper-fixtures.R
 #
-# Synthetic fixtures shared across test files. testthat sources helper-*.R
-# before any test, so these are available everywhere without per-file copies.
+# Synthetic fixtures shared across test files. testthat sources helper files
+# before any test, so each test file does not need its own copy.
 
 # Random RGB pixel array, height x width x 3 in [0, 1].
 synth_rgb <- function(h = 6, w = 8) {
@@ -26,7 +26,7 @@ synth_section <- function(h = 12, w = 10) {
   )
 }
 
-# A minimal stand-in for fq_section: the kmeans methods only read @rgb and @mask.
+# A minimal stub for fq_section. The kmeans methods only read @rgb and @mask.
 section_stub <- S7::new_class(
   "section_stub",
   properties = list(

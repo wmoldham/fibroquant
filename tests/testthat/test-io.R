@@ -1,8 +1,8 @@
 # test-io.R
 
-# Synthetic RBioFormats-style metadata (0-based indices, to exercise the
-# normalisation). One entry per (series, level); the physical pixel size sits on
-# the first entry's global metadata, as it does in a real .vsi.
+# Synthetic RBioFormats metadata with 0 based indices to exercise the
+# normalisation. One entry per (series, level). The physical pixel size sits on
+# the first entry's global metadata, as in a real .vsi.
 fake_meta <-
   function() {
     entry <-

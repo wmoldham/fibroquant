@@ -153,10 +153,10 @@ fq_run <- function(
       )
     }
 
-  # One self-contained worker per slide. in_parallel() crates it (via carrier)
-  # so it serialises to mirai daemons; it references only installed-package
-  # functions plus the captured fit and split parameters. With no daemons set,
-  # purrr runs it sequentially.
+  # One worker per slide. in_parallel() crates it via carrier so it serialises
+  # to mirai daemons. It references only installed package functions plus the
+  # captured fit and split parameters. With no daemons set, purrr runs it
+  # sequentially.
   worker <-
     purrr::in_parallel(
       function(row) {
@@ -201,7 +201,6 @@ fq_run <- function(
       }
     )
 
-  # Parallelise only if the caller has set daemons; otherwise run in-process.
   parts <- purrr::map(rows, worker, .progress = progress)
   scores <- dplyr::bind_rows(parts)
 
@@ -221,9 +220,9 @@ fq_run <- function(
 
 # Internal helpers -------------------------------------------------------------
 
-# Fit the analyzer on a representative subsample: pick the reference slides,
-# read and split each, pool their first sections, and fit. Serial and seeded so
-# the basis is reproducible (the seed also governs any per-section pixel cap).
+# Fit the analyzer on a representative subsample. Pick the reference slides,
+# read and split each, pool their first sections, and fit. This runs serially
+# and seeded so the basis is reproducible. The seed also governs any pixel cap.
 .fit_reference <- function(
     manifest,
     spec,
@@ -257,8 +256,8 @@ fq_run <- function(
   fq_fit(spec, ref_sections)
 }
 
-# Choose the reference slides for the fit: all of them when n_ref covers the
-# set, else a random draw, or an even draw across the strata of one column.
+# Choose the reference slides for the fit. Use all of them when n_ref covers the
+# set, otherwise a random draw, or an even draw across the strata of one column.
 .sample_reference <- function(manifest, n_ref, stratify) {
   n_slides <- nrow(manifest)
   if (is.null(n_ref) || n_ref >= n_slides) {

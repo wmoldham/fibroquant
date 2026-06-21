@@ -1,7 +1,7 @@
 # test-batch.R
 
-# Synthetic two-section slide with colour-varying tissue, written to a real
-# raster file. The colour variation gives k-means distinct points to cluster.
+# Synthetic slide with two coloured tissue blocks, written to a raster file.
+# The colour variation gives the clustering distinct points to work with.
 write_coloured_two_section_png <- function(path) {
   rgb <- array(1, dim = c(120, 40, 3))
   rgb[10:40, 8:32, ] <- array(runif(31 * 25 * 3, 0.1, 0.6), dim = c(31, 25, 3))

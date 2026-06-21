@@ -95,7 +95,7 @@ fq_section <-
 
 # Summary and printing ---------------------------------------------------------
 
-# One-line summary of an fq_slide or fq_section.
+# Summarise an fq_slide or fq_section in one line.
 .fq_summary <- function(x) {
   dims <- dim(x@rgb)
   size <- paste0(dims[1], " \u00d7 ", dims[2], " px")

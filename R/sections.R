@@ -25,8 +25,8 @@ fq_split <- function(slide,
                      min_area_frac = 0.05) {
   foreground <- .tissue_mask(slide@rgb)
 
-  # Close each porous section into a solid blob, then fill alveolar holes; the
-  # wide inter-section gap is too large to bridge and stays open.
+  # Close each porous section into a solid blob, then fill alveolar holes. The
+  # wide gap between sections is too large to bridge and stays open.
   close_px <- .microns_to_px(close_um, slide@um_per_px)
   brush <-
     EBImage::makeBrush(
@@ -57,7 +57,7 @@ fq_split <- function(slide,
 # Internal helpers -------------------------------------------------------------
 
 # Labels of the components to keep: the n largest above min_area_frac of the
-# biggest, reordered along the first spatial axis (left to right).
+# biggest, ordered along the first spatial axis.
 .rank_components <- function(labels, n, min_area_frac) {
   idx <- which(labels > 0)
   if (length(idx) == 0) {
@@ -83,8 +83,8 @@ fq_split <- function(slide,
   rgb <- slide@rgb[rows[1]:rows[2], cols[1]:cols[2], , drop = FALSE]
   footprint <- region[rows[1]:rows[2], cols[1]:cols[2], drop = FALSE]
 
-  # Re-threshold the cropped section to drop the airway and whitespace lumen the
-  # split filled over; intersect with the footprint to hold the section boundary.
+  # Threshold the crop again to drop the airway and whitespace lumen that the
+  # split filled over. Intersect with the footprint to hold the boundary.
   mask <- .tissue_mask(rgb) & footprint
 
   fq_section(

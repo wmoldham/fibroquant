@@ -10,8 +10,8 @@
   )
 }
 
-# Paint a rectangle border into an RGB array in image space, so it stays visible
-# at any display scale.
+# Paint a rectangle border into an RGB array. Drawing in image space keeps it
+# visible at any display scale.
 .draw_box <- function(rgb, rows, cols, color, thickness) {
   r1 <- rows[1]
   r2 <- rows[2]
@@ -47,9 +47,9 @@ S7::method(plot, fq_section) <- function(x, ...) {
   invisible(x)
 }
 
-# plot() on a slide shows the scan. Supplying `sections` (from fq_split())
-# overlays each section's crop rectangle on the parent instead -- a quick check
-# that the split caught every section and ignored streaks or debris.
+# plot() on a slide shows the scan. Pass `sections` from fq_split() to overlay
+# each crop rectangle on the parent instead. This checks that the split caught
+# every section and ignored streaks or debris.
 S7::method(plot, fq_slide) <- function(x, sections = NULL, col = "red", ...) {
   if (is.null(sections)) {
     EBImage::display(
@@ -67,8 +67,8 @@ S7::method(plot, fq_slide) <- function(x, sections = NULL, col = "red", ...) {
   invisible(x)
 }
 
-# plot() on an fq_sections collection is a contact sheet: each section in its own
-# panel, labelled by section.
+# plot() on an fq_sections collection is a contact sheet. Each section gets its
+# own panel, labelled by section.
 S7::method(plot, fq_sections) <- function(x, ...) {
   old <- graphics::par(mfrow = c(1, length(x)))
   on.exit(graphics::par(old), add = TRUE)
@@ -80,8 +80,7 @@ S7::method(plot, fq_sections) <- function(x, ...) {
 }
 
 # Map a severity field to an H x W x 3 RGB array. Each grade takes a colour
-# sampled along a blue -> orange -> red severity ramp; off-tissue pixels are
-# white.
+# along a blue to orange to red ramp. Pixels off tissue are white.
 .pseudocolor <- function(field) {
   values <- field@values
   pal <- grDevices::colorRampPalette(c("#1F74E0", "#F2891C", "#BE1622"))
