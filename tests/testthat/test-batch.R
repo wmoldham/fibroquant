@@ -100,3 +100,33 @@ test_that("fq_run reuses a fitted analyzer without refitting", {
   expect_identical(out$fit, fit)
   expect_equal(nrow(out$scores), 4L)
 })
+
+test_that("fq_run skips a slide that fails to score, with a warning", {
+  dir <- withr::local_tempdir()
+  write_coloured_two_section_png(file.path(dir, "good.png"))
+  writeLines("not an image", file.path(dir, "bad.png")) # unreadable as an image
+
+  manifest <- fq_manifest(dir)
+  good_only <- manifest[manifest$slide_id == "good", ]
+  fit <- fq_run(good_only, fq_kmeans(k = 3), n_ref = 1)$fit
+
+  expect_warning(
+    out <- fq_run(manifest, fit),
+    "Skipped 1 slide"
+  )
+  expect_setequal(unique(out$scores$slide_id), "good")
+  expect_false(".error" %in% names(out$scores))
+})
+
+test_that("fq_run leaves the caller's RNG untouched", {
+  dir <- withr::local_tempdir()
+  for (id in c("s1", "s2")) {
+    write_coloured_two_section_png(file.path(dir, paste0(id, ".png")))
+  }
+  manifest <- fq_manifest(dir)
+
+  set.seed(42)
+  before <- .Random.seed
+  fq_run(manifest, fq_kmeans(k = 3), n_ref = 2)
+  expect_identical(.Random.seed, before)
+})

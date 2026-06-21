@@ -20,3 +20,9 @@ A one-row tibble: \code{severity_index} plus analyzer-specific columns.
 Applies a \link[=fq_analyzer]{fit} to one section and returns its metrics as a
 single row. Dispatches on \code{fit}.
 }
+\details{
+Every method must return a one-row tibble with a numeric \code{severity_index}
+column. That shared column lets scores from any analyzer be stacked into one
+table and is what \code{\link[=fq_run]{fq_run()}} joins covariates onto. Methods may add any
+number of further columns.
+}

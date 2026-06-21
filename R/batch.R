@@ -72,8 +72,9 @@ fq_manifest <- function(
 #' Runs the full pipeline over a manifest. It fits the analyzer once on a
 #' representative subsample of slides, or reuses a fit you pass in, then splits
 #' and scores every slide. It returns one row per section with the manifest's
-#' covariates joined on. It does not produce severity maps. Generate any you
-#' need with [fq_render()] from the returned fit and a section.
+#' covariates joined on. A slide that fails to read or score is skipped with a
+#' warning rather than stopping the run. It does not produce severity maps.
+#' Generate any you need with [fq_render()] from the returned fit and a section.
 #'
 #' Parallelism is optional and controlled by the caller. Set `mirai::daemons(n)`
 #' in your session and the work for each slide runs across those daemons. With
@@ -159,32 +160,43 @@ fq_run <- function(
   # One worker per slide. in_parallel() crates it via carrier so it serialises
   # to mirai daemons. It references only installed package functions plus the
   # captured fit and split parameters. With no daemons set, purrr runs it
-  # sequentially.
+  # sequentially. A slide that fails to read or score returns a row carrying its
+  # error instead of stopping the batch.
   worker <-
     purrr::in_parallel(
       function(row) {
-        slide <- fibroquant::fq_read(row$path, target_um_px = target_um_px)
-        sections <-
-          fibroquant::fq_split(
-            slide,
-            n = n,
-            close_um = close_um,
-            min_area_frac = min_area_frac
-          )
-        graded <-
-          lapply(
-            seq_along(sections),
-            function(i) {
-              section <- sections[[i]]
-              keys <-
-                tibble::tibble(
-                  slide_id = row$slide_id,
-                  section = section@section
-                )
-              dplyr::bind_cols(keys, fibroquant::fq_score(fit, section))
-            }
-          )
-        dplyr::bind_rows(graded)
+        tryCatch(
+          {
+            slide <- fibroquant::fq_read(row$path, target_um_px = target_um_px)
+            sections <-
+              fibroquant::fq_split(
+                slide,
+                n = n,
+                close_um = close_um,
+                min_area_frac = min_area_frac
+              )
+            graded <-
+              lapply(
+                seq_along(sections),
+                function(i) {
+                  section <- sections[[i]]
+                  keys <-
+                    tibble::tibble(
+                      slide_id = row$slide_id,
+                      section = section@section
+                    )
+                  dplyr::bind_cols(keys, fibroquant::fq_score(fit, section))
+                }
+              )
+            dplyr::bind_rows(graded)
+          },
+          error = function(e) {
+            tibble::tibble(
+              slide_id = row$slide_id,
+              .error = conditionMessage(e)
+            )
+          }
+        )
       },
       fit = fit,
       n = n,
@@ -207,6 +219,24 @@ fq_run <- function(
   parts <- purrr::map(rows, worker, .progress = progress)
   scores <- dplyr::bind_rows(parts)
 
+  # Failed slides carry a .error column and no metrics. Warn and drop them so
+  # one bad slide does not sink the whole batch.
+  if (".error" %in% names(scores)) {
+    failed <- scores[!is.na(scores$.error), , drop = FALSE]
+    if (nrow(failed) > 0) {
+      warning(
+        "Skipped ", nrow(failed), " slide(s) that failed to score: ",
+        paste0(failed$slide_id, " (", failed$.error, ")", collapse = "; "),
+        call. = FALSE
+      )
+    }
+    scores <- scores[
+      is.na(scores$.error),
+      setdiff(names(scores), ".error"),
+      drop = FALSE
+    ]
+  }
+
   covariates <- manifest[, setdiff(names(manifest), "path"), drop = FALSE]
   result <-
     dplyr::left_join(
@@ -224,8 +254,9 @@ fq_run <- function(
 # Internal helpers -------------------------------------------------------------
 
 # Fit the analyzer on a representative subsample. Pick the reference slides,
-# read and split each, pool their first sections, and fit. This runs serially
-# and seeded so the basis is reproducible. The seed also governs any pixel cap.
+# read and split each, pool their first sections, and fit. The seed governs the
+# subsample, the k-means restarts, and any pixel cap. with_seed scopes it so the
+# caller's RNG is left untouched.
 .fit_reference <- function(
     manifest,
     spec,
@@ -237,26 +268,27 @@ fq_run <- function(
     stratify,
     seed
 ) {
-  set.seed(seed)
-  ref <- .sample_reference(manifest, n_ref, stratify)
+  withr::with_seed(seed, {
+    ref <- .sample_reference(manifest, n_ref, stratify)
 
-  ref_sections <-
-    lapply(
-      seq_len(nrow(ref)),
-      function(i) {
-        slide <- fq_read(ref$path[i], target_um_px = target_um_px)
-        sections <-
-          fq_split(
-            slide,
-            n = n,
-            close_um = close_um,
-            min_area_frac = min_area_frac
-          )
-        sections[[1]]
-      }
-    )
+    ref_sections <-
+      lapply(
+        seq_len(nrow(ref)),
+        function(i) {
+          slide <- fq_read(ref$path[i], target_um_px = target_um_px)
+          sections <-
+            fq_split(
+              slide,
+              n = n,
+              close_um = close_um,
+              min_area_frac = min_area_frac
+            )
+          sections[[1]]
+        }
+      )
 
-  fq_fit(spec, ref_sections)
+    fq_fit(spec, ref_sections)
+  })
 }
 
 # Choose the reference slides for the fit. Use all of them when n_ref covers the

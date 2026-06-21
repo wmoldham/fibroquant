@@ -51,6 +51,11 @@ fq_fit <-
 #' Applies a [fit][fq_analyzer] to one section and returns its metrics as a
 #' single row. Dispatches on `fit`.
 #'
+#' Every method must return a one-row tibble with a numeric `severity_index`
+#' column. That shared column lets scores from any analyzer be stacked into one
+#' table and is what [fq_run()] joins covariates onto. Methods may add any
+#' number of further columns.
+#'
 #' @param fit An [fq_analyzer] from [fq_fit()].
 #' @param section An `fq_section`.
 #' @param ... Passed on to methods.

@@ -62,8 +62,9 @@ fitted \link{fq_analyzer}, for reuse or rendering.
 Runs the full pipeline over a manifest. It fits the analyzer once on a
 representative subsample of slides, or reuses a fit you pass in, then splits
 and scores every slide. It returns one row per section with the manifest's
-covariates joined on. It does not produce severity maps. Generate any you
-need with \code{\link[=fq_render]{fq_render()}} from the returned fit and a section.
+covariates joined on. A slide that fails to read or score is skipped with a
+warning rather than stopping the run. It does not produce severity maps.
+Generate any you need with \code{\link[=fq_render]{fq_render()}} from the returned fit and a section.
 }
 \details{
 Parallelism is optional and controlled by the caller. Set \code{mirai::daemons(n)}
