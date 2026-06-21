@@ -25,6 +25,8 @@ fake_two_section_slide <- function() {
   )
 }
 
+# .rank_components -------------------------------------------------------------
+
 test_that(".rank_components keeps the n largest and orders left to right", {
   labels <- matrix(0L, nrow = 20, ncol = 10)
   labels[2:6, 2:8] <- 1L   # left, area 35
@@ -37,6 +39,8 @@ test_that(".rank_components keeps the n largest and orders left to right", {
   flipped[2:6, 2:8] <- 2L   # label 2 on the left
   expect_equal(.rank_components(flipped, 2, 0.1), c(2L, 1L)) # left first
 })
+
+# fq_split ---------------------------------------------------------------------
 
 test_that("fq_split returns an ordered fq_sections collection, dropping the streak", {
   sections <- fq_split(fake_two_section_slide(), close_um = 4)

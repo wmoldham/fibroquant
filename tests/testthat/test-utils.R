@@ -1,5 +1,7 @@
 # test-utils.R
 
+# .tissue_mask -----------------------------------------------------------------
+
 test_that(".tissue_mask marks dark tissue and leaves bright background out", {
   rgb <-
     array(
@@ -14,6 +16,8 @@ test_that(".tissue_mask marks dark tissue and leaves bright background out", {
   expect_true(all(mask[3:7, 3:7])) # the dark block is tissue
   expect_false(any(mask[1:2, ]))   # the bright margin is not
 })
+
+# .microns_to_px ---------------------------------------------------------------
 
 test_that(".microns_to_px converts, floors at 1, and falls back when uncalibrated", {
   expect_equal(.microns_to_px(50, 4), 12L)

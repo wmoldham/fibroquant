@@ -1,5 +1,7 @@
 # analyzer.R
 
+# Abstract classes -------------------------------------------------------------
+
 #' Analyzer specification
 #'
 #' Abstract parent of the analyzer specs. A spec is the recipe -- which analyzer
@@ -26,6 +28,8 @@ fq_analyzer <-
     "fq_analyzer",
     abstract = TRUE
   )
+
+# Generics ---------------------------------------------------------------------
 
 #' Fit an analyzer on a batch of sections
 #'

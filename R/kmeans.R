@@ -1,5 +1,7 @@
 # kmeans.R
 
+# Classes ----------------------------------------------------------------------
+
 #' k-means colour-segmentation spec
 #'
 #' [spec][fq_spec] for the k-means analyzer: cluster masked tissue pixels in
@@ -104,6 +106,8 @@ fq_field <-
     )
   )
 
+# Internal helpers -------------------------------------------------------------
+
 # Gaussian-blur each RGB channel to damp single-pixel stain speckle. sigma is in
 # pixels; 0 leaves the image unchanged. With a mask, blur as a normalised
 # convolution so off-mask pixels (airspace) carry no weight into masked tissue.
@@ -172,6 +176,8 @@ fq_field <-
   )
   max.col(-d, ties.method = "first")
 }
+
+# Methods ----------------------------------------------------------------------
 
 # Pool masked tissue pixels across sections, k-means on the chosen channels,
 # then order clusters by descending mean L* so centre row i is severity grade i.

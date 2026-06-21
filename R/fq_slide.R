@@ -1,5 +1,7 @@
 # fq_slide.R
 
+# Classes ----------------------------------------------------------------------
+
 #' A whole-slide scan
 #'
 #' The core `fibroquant` object: a normalised RGB scan, its physical scale, and
@@ -91,6 +93,8 @@ fq_section <-
     }
   )
 
+# Summary and printing ---------------------------------------------------------
+
 # One-line summary of an fq_slide or fq_section.
 .fq_summary <- function(x) {
   dims <- dim(x@rgb)
@@ -136,6 +140,8 @@ S7::method(print, fq_slide) <- function(x, ...) {
   )
   invisible(x)
 }
+
+# fq_sections ------------------------------------------------------------------
 
 #' A collection of tissue sections from one slide
 #'

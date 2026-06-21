@@ -1,7 +1,7 @@
 # test-plot.R
 # Fixtures: synth_section(), with_null_device() in helper-fixtures.R
 
-# .draw_box -------------------------------------------------------------------
+# .draw_box --------------------------------------------------------------------
 
 test_that(".draw_box paints a coloured border and leaves the rest untouched", {
   rgb <-
@@ -42,7 +42,7 @@ test_that(".draw_box handles a box flush against the edge", {
   expect_no_error(.draw_box(rgb, c(1, 20), c(1, 20), c(1, 0, 0), thickness = 2L))
 })
 
-# .draw_section_boxes ---------------------------------------------------------
+# .draw_section_boxes ----------------------------------------------------------
 
 test_that(".draw_section_boxes paints a box at each section's bbox", {
   rgb <-
@@ -57,7 +57,7 @@ test_that(".draw_section_boxes paints a box at each section's bbox", {
   expect_equal(out[20, 20, ], c(0, 0, 0)) # parent interior untouched
 })
 
-# .fq_image -------------------------------------------------------------------
+# .fq_image --------------------------------------------------------------------
 
 test_that(".fq_image builds a colour Image", {
   rgb <-
@@ -70,7 +70,25 @@ test_that(".fq_image builds a colour Image", {
   expect_equal(dim(img)[1:2], c(12L, 10L))
 })
 
-# plot ------------------------------------------------------------------------
+# .pseudocolor -----------------------------------------------------------------
+
+test_that(".pseudocolor returns an RGB array with white off tissue", {
+  fld <- fq_field(values = matrix(c(1, 2, NA, 3), 2, 2), k = 3L)
+  px <- .pseudocolor(fld)
+
+  expect_equal(dim(px), c(2L, 2L, 3L))
+  expect_true(all(px >= 0 & px <= 1))
+  expect_equal(px[1, 2, ], c(1, 1, 1)) # NA pixel -> white
+})
+
+test_that(".pseudocolor gives each grade a distinct colour", {
+  fld <- fq_field(values = matrix(1:3, 1, 3), k = 3L)
+  px <- .pseudocolor(fld)
+  cols <- rbind(px[1, 1, ], px[1, 2, ], px[1, 3, ])
+  expect_equal(nrow(unique(cols)), 3L)
+})
+
+# plot -------------------------------------------------------------------------
 
 test_that("plot renders a section and a slide image, returning input invisibly", {
   section <- synth_section()
@@ -111,22 +129,6 @@ test_that("plot renders an fq_sections contact sheet, returning it invisibly", {
   })
   expect_false(result$visible)
   expect_identical(result$value, sheet)
-})
-
-test_that(".pseudocolor returns an RGB array with white off tissue", {
-  fld <- fq_field(values = matrix(c(1, 2, NA, 3), 2, 2), k = 3L)
-  px <- .pseudocolor(fld)
-
-  expect_equal(dim(px), c(2L, 2L, 3L))
-  expect_true(all(px >= 0 & px <= 1))
-  expect_equal(px[1, 2, ], c(1, 1, 1)) # NA pixel -> white
-})
-
-test_that(".pseudocolor gives each grade a distinct colour", {
-  fld <- fq_field(values = matrix(1:3, 1, 3), k = 3L)
-  px <- .pseudocolor(fld)
-  cols <- rbind(px[1, 1, ], px[1, 2, ], px[1, 3, ])
-  expect_equal(nrow(unique(cols)), 3L)
 })
 
 test_that("plot(fq_field) renders without error", {

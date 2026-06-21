@@ -25,6 +25,8 @@ fake_meta <-
     )
   }
 
+# .physical_um_per_px ----------------------------------------------------------
+
 test_that(".physical_um_per_px parses the size, scanning past series without it", {
   ok <- list(list(globalMetadata = list("Physical pixel size" = "(0.2738, 0.2739)")))
   expect_equal(.physical_um_per_px(ok), 0.2738)
@@ -41,6 +43,8 @@ test_that(".physical_um_per_px parses the size, scanning past series without it"
   expect_true(is.na(.physical_um_per_px(missing)))
 })
 
+# .info_table ------------------------------------------------------------------
+
 test_that(".info_table normalises indices and computes um/px per level", {
   info <- .info_table(fake_meta())
 
@@ -53,6 +57,8 @@ test_that(".info_table normalises indices and computes um/px per level", {
   expect_equal(s2$um_px, c(0.5, 1.0)) # pixels double in size each level down
 })
 
+# fq_info ----------------------------------------------------------------------
+
 test_that("fq_info reads a real .vsi (integration)", {
   skip_if_no_vsi()
 
@@ -62,6 +68,7 @@ test_that("fq_info reads a real .vsi (integration)", {
   expect_true(all(info$um_px > 0))
 })
 
+# .pick_scan_series ------------------------------------------------------------
 
 test_that(".pick_scan_series picks the largest series despite integer overflow", {
   info <- tibble::tibble(
@@ -74,6 +81,8 @@ test_that(".pick_scan_series picks the largest series despite integer overflow",
   expect_equal(.pick_scan_series(info), 3L)
 })
 
+# .pick_resolution -------------------------------------------------------------
+
 test_that(".pick_resolution chooses the level closest to the target um/px", {
   info <- tibble::tibble(
     series = rep(3L, 4),
@@ -85,6 +94,8 @@ test_that(".pick_resolution chooses the level closest to the target um/px", {
   expect_equal(.pick_resolution(info, series = 3, target_um_px = 1), 3L)
   expect_equal(.pick_resolution(info, series = 3, target_um_px = 2), 4L)
 })
+
+# .as_rgb_array ----------------------------------------------------------------
 
 test_that(".as_rgb_array returns a height x width x 3 array in [0, 1]", {
   arr <- array(
@@ -102,6 +113,8 @@ test_that(".as_rgb_array returns a height x width x 3 array in [0, 1]", {
   gray <- EBImage::Image(matrix(runif(10 * 12), 10, 12))
   expect_equal(dim(.as_rgb_array(gray)), c(10L, 12L, 3L)) # grayscale -> 3 channels
 })
+
+# fq_read ----------------------------------------------------------------------
 
 test_that("fq_read reads a standard raster into an fq_slide", {
   arr <-

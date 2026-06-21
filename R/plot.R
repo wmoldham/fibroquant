@@ -1,5 +1,7 @@
 # plot.R
 
+# Drawing helpers --------------------------------------------------------------
+
 # Build a displayable colour Image from a slide's pixel array.
 .fq_image <- function(rgb) {
   EBImage::Image(
@@ -34,6 +36,8 @@
   }
   rgb
 }
+
+# plot methods -----------------------------------------------------------------
 
 S7::method(plot, fq_section) <- function(x, ...) {
   EBImage::display(

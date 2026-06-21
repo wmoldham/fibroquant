@@ -1,6 +1,8 @@
 # test-fq_slide.R
 # Fixtures: synth_rgb() in helper-fixtures.R
 
+# fq_slide ---------------------------------------------------------------------
+
 test_that("fq_slide constructs and exposes its properties", {
   rgb <- synth_rgb()
   s <-
@@ -44,6 +46,8 @@ test_that("fq_slide rejects a non-positive scale", {
     "positive"
   )
 })
+
+# fq_section -------------------------------------------------------------------
 
 test_that("fq_section inherits fq_slide and adds section properties", {
   rgb <- synth_rgb(6, 8)
@@ -89,7 +93,30 @@ test_that("fq_section rejects a mask that does not match the pixels", {
   )
 })
 
-# .fq_summary -----------------------------------------------------------------
+test_that("fq_section requires a footprint the size of rgb", {
+  rgb <-
+    array(
+      0.2,
+      dim = c(10, 8, 3)
+    )
+  mask <- matrix(TRUE, 10, 8)
+  build <- function(footprint) {
+    fq_section(
+      rgb = rgb,
+      um_per_px = 4,
+      source = list(),
+      mask = mask,
+      footprint = footprint,
+      bbox = list(rows = c(1, 10), cols = c(1, 8)),
+      section = "A"
+    )
+  }
+
+  expect_error(build(matrix(TRUE, 5, 5)), "footprint")  # wrong size
+  expect_true(S7::S7_inherits(build(matrix(TRUE, 10, 8)), fq_section))
+})
+
+# .fq_summary ------------------------------------------------------------------
 
 test_that(".fq_summary describes a calibrated slide", {
   slide <-
@@ -141,6 +168,8 @@ test_that(".fq_summary adds the label and tissue fraction for a section", {
   )
 })
 
+# print.fq_slide ---------------------------------------------------------------
+
 test_that("print.fq_slide writes the summary and returns its input invisibly", {
   slide <-
     fq_slide(
@@ -153,27 +182,4 @@ test_that("print.fq_slide writes the summary and returns its input invisibly", {
   result <- withVisible(print(slide))
   expect_false(result$visible)
   expect_identical(result$value, slide)
-})
-
-test_that("fq_section requires a footprint the size of rgb", {
-  rgb <-
-    array(
-      0.2,
-      dim = c(10, 8, 3)
-    )
-  mask <- matrix(TRUE, 10, 8)
-  build <- function(footprint) {
-    fq_section(
-      rgb = rgb,
-      um_per_px = 4,
-      source = list(),
-      mask = mask,
-      footprint = footprint,
-      bbox = list(rows = c(1, 10), cols = c(1, 8)),
-      section = "A"
-    )
-  }
-
-  expect_error(build(matrix(TRUE, 5, 5)), "footprint")  # wrong size
-  expect_true(S7::S7_inherits(build(matrix(TRUE, 10, 8)), fq_section))
 })

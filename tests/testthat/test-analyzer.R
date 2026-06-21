@@ -19,10 +19,14 @@ S7::method(fq_render, demo_fit) <- function(fit, section, ...) {
   matrix(fit@value, nrow = 1, ncol = 1)
 }
 
+# abstract classes -------------------------------------------------------------
+
 test_that("abstract specs and fits cannot be constructed", {
   expect_error(fq_spec())
   expect_error(fq_analyzer())
 })
+
+# dispatch ---------------------------------------------------------------------
 
 test_that("fq_fit dispatches on the spec and returns a fit", {
   fit <- fq_fit(demo_spec(), list(1, 2, 3))

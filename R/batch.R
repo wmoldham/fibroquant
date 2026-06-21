@@ -1,5 +1,7 @@
 # batch.R
 
+# fq_manifest ------------------------------------------------------------------
+
 #' Build a manifest of slide files for batch processing
 #'
 #' Scans a directory (or takes an explicit list of paths) for slide files
@@ -61,6 +63,8 @@ fq_manifest <- function(
     path = files
   )
 }
+
+# fq_run -----------------------------------------------------------------------
 
 #' Score a folder of slides against one analyzer
 #'
@@ -214,6 +218,8 @@ fq_run <- function(
     fit = fit
   )
 }
+
+# Internal helpers -------------------------------------------------------------
 
 # Fit the analyzer on a representative subsample: pick the reference slides,
 # read and split each, pool their first sections, and fit. Serial and seeded so

@@ -1,5 +1,7 @@
 # sections.R
 
+# fq_split ---------------------------------------------------------------------
+
 #' Split a multi-section slide into one fq_section per tissue section
 #'
 #' Lung slides routinely carry several sections side by side. This finds them by
@@ -51,6 +53,8 @@ fq_split <- function(slide,
     )
   fq_sections(sections)
 }
+
+# Internal helpers -------------------------------------------------------------
 
 # Labels of the components to keep: the n largest above min_area_frac of the
 # biggest, reordered along the first spatial axis (left to right).

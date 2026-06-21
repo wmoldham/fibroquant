@@ -1,3 +1,7 @@
+# io.R
+
+# fq_info ----------------------------------------------------------------------
+
 #' Tabulate the image series and resolution levels in a slide file
 #'
 #' Whole-slide formats such as Olympus `.vsi` pack several images (a label, a
@@ -85,6 +89,8 @@ fq_info <- function(path) {
   }
   NA_real_
 }
+
+# fq_read ----------------------------------------------------------------------
 
 # Series with the largest pixel area is the high-resolution scan. as.numeric
 # guards against 32-bit integer overflow on whole-slide pixel counts.

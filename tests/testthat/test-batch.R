@@ -12,7 +12,7 @@ write_coloured_two_section_png <- function(path) {
   )
 }
 
-# fq_manifest ----------------------------------------------------------------
+# fq_manifest ------------------------------------------------------------------
 
 test_that("fq_manifest lists matching files in a directory", {
   dir <- withr::local_tempdir()
@@ -51,7 +51,7 @@ test_that("fq_manifest disambiguates duplicate slide ids", {
   expect_equal(anyDuplicated(man$slide_id), 0L)
 })
 
-# fq_run ---------------------------------------------------------------------
+# fq_run -----------------------------------------------------------------------
 
 test_that("fq_run scores every section and joins covariates", {
   dir <- withr::local_tempdir()

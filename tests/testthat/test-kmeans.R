@@ -1,6 +1,8 @@
 # test-kmeans.R
 # Fixtures: section_stub, two_colour() in helper-fixtures.R
 
+# fq_kmeans (spec) -------------------------------------------------------------
+
 test_that("fq_kmeans builds a spec with sensible defaults", {
   spec <- fq_kmeans()
   expect_true(S7::S7_inherits(spec, fq_spec))
@@ -27,6 +29,15 @@ test_that("fq_kmeans rejects invalid arguments", {
   expect_error(fq_kmeans(smooth_sigma = -1))
   expect_error(fq_kmeans(nstart = 0))
 })
+
+test_that("fq_kmeans carries and validates max_px", {
+  expect_equal(fq_kmeans()@max_px, 1e5)
+  expect_equal(fq_kmeans(max_px = 5e4)@max_px, 5e4)
+  expect_error(fq_kmeans(max_px = 0), "max_px")
+  expect_error(fq_kmeans(max_px = c(1, 2)), "max_px")
+})
+
+# .smooth ----------------------------------------------------------------------
 
 test_that(".smooth blurs each channel and preserves shape and range", {
   rgb <- array(0, dim = c(20, 20, 3))
@@ -83,6 +94,8 @@ test_that(".smooth keeps airspace from bleeding into masked tissue", {
   )
 })
 
+# .lab -------------------------------------------------------------------------
+
 test_that(".lab converts to CIELAB with L*a*b* in channel order", {
   rgb <- array(0, dim = c(2, 2, 3))
   rgb[1, 1, ] <- c(1, 1, 1) # white
@@ -102,6 +115,8 @@ test_that(".lab preserves non-square image shape", {
   rgb <- array(runif(3 * 5 * 3), dim = c(3, 5, 3))
   expect_equal(dim(.lab(rgb)), c(3L, 5L, 3L))
 })
+
+# .features --------------------------------------------------------------------
 
 test_that(".features selects channels at masked pixels", {
   lab <- array(0, dim = c(2, 3, 3))
@@ -140,6 +155,8 @@ test_that(".features respects channel order and names", {
   expect_true(all(feat[, "L"] == 1))
 })
 
+# fq_fit -----------------------------------------------------------------------
+
 test_that("fq_fit on fq_kmeans returns a severity-ordered analyzer", {
   set.seed(1)
   fit <- fq_fit(fq_kmeans(k = 2, smooth_sigma = 0), list(two_colour(matrix(TRUE, 20, 20))))
@@ -169,6 +186,8 @@ test_that("fq_fit on fq_kmeans errors with fewer pixels than clusters", {
   expect_error(fq_fit(fq_kmeans(k = 3, smooth_sigma = 0), list(sec)))
 })
 
+# fq_score ---------------------------------------------------------------------
+
 test_that("fq_score returns area fractions and a severity index", {
   set.seed(1)
   sec <- two_colour(matrix(TRUE, 20, 20))
@@ -194,6 +213,8 @@ test_that("fq_score names fraction columns frac_sev_1..k", {
   expect_equal(sc$frac_sev_1 + sc$frac_sev_2 + sc$frac_sev_3, 1)
 })
 
+# fq_render --------------------------------------------------------------------
+
 test_that("fq_render returns a grade field with NA off tissue", {
   set.seed(1)
   mask <- matrix(TRUE, 20, 20)
@@ -208,11 +229,4 @@ test_that("fq_render returns a grade field with NA off tissue", {
   expect_true(all(is.na(fld@values[, 1])))     # masked column
   expect_true(all(fld@values[1:10, 2:20] == 1)) # cyan -> grade 1
   expect_true(all(fld@values[11:20, 2:20] == 2)) # red -> grade 2
-})
-
-test_that("fq_kmeans carries and validates max_px", {
-  expect_equal(fq_kmeans()@max_px, 1e5)
-  expect_equal(fq_kmeans(max_px = 5e4)@max_px, 5e4)
-  expect_error(fq_kmeans(max_px = 0), "max_px")
-  expect_error(fq_kmeans(max_px = c(1, 2)), "max_px")
 })
