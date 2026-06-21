@@ -1,12 +1,5 @@
 # test-fq_slide.R
-
-# Self-contained synthetic pixels so each test carries its own fixture.
-synth_rgb <- function(h = 6, w = 8) {
-  array(
-    runif(h * w * 3),
-    dim = c(h, w, 3)
-  )
-}
+# Fixtures: synth_rgb() in helper-fixtures.R
 
 test_that("fq_slide constructs and exposes its properties", {
   rgb <- synth_rgb()

@@ -1,36 +1,5 @@
 # test-plot.R
-
-# Send graphics to a throwaway device so plotting tests stay headless.
-with_null_device <- function(code) {
-  grDevices::pdf(NULL)
-  on.exit(grDevices::dev.off())
-  force(code)
-}
-
-synth_section <- function(h = 12, w = 10) {
-  rgb <-
-    array(
-      1,
-      dim = c(h, w, 3)
-    )
-  rgb[3:9, 3:7, ] <- 0.2
-  mask <-
-    matrix(
-      FALSE,
-      nrow = h,
-      ncol = w
-    )
-  mask[3:9, 3:7] <- TRUE
-
-  fq_section(
-    rgb = rgb,
-    um_per_px = 4,
-    source = list(path = "synthetic"),
-    mask = mask,
-    bbox = list(rows = c(1L, h), cols = c(1L, w)),
-    section = "A"
-  )
-}
+# Fixtures: synth_section(), with_null_device() in helper-fixtures.R
 
 # .draw_box -------------------------------------------------------------------
 
