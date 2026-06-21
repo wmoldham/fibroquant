@@ -219,7 +219,7 @@ S7::method(fq_score, fq_kmeans_analyzer) <- function(fit, section, ...) {
   frac <- tabulate(grade, nbins = k) / length(grade)
   cols <- c(
     list(severity_index = sum(frac * (seq_len(k) - 1) / (k - 1)) * 10),
-    setNames(as.list(frac), paste0("frac_sev_", seq_len(k)))
+    stats::setNames(as.list(frac), paste0("frac_sev_", seq_len(k)))
   )
   tibble::as_tibble(cols)
 }
