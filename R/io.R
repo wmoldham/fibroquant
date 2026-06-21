@@ -166,7 +166,9 @@ fq_read <- function(
       normalize = TRUE
     )
   rgb <- .as_rgb_array(img)
-  eff_um_px <- info$um_px[info$series == series & info$res == resolution][1]
+  in_series <- info$series == series
+  eff_um_px <- info$um_px[in_series & info$res == resolution][1]
+  native_um_px <- info$um_px[in_series & info$res == 1L][1]
 
   fq_slide(
     rgb = rgb,
@@ -176,7 +178,7 @@ fq_read <- function(
       format = "bioformats",
       series = series,
       resolution = resolution,
-      native_um_px = attr(info, "native_um_px"),
+      native_um_px = native_um_px,
       dims = dim(rgb)[1:2]
     )
   )

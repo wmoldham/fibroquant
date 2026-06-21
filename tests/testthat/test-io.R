@@ -149,4 +149,11 @@ test_that("fq_read reads a real .vsi (integration)", {
   expect_equal(length(dim(s@rgb)), 3L)
   expect_gt(s@um_per_px, 0)
   expect_equal(s@source$format, "bioformats")
+
+  # native_um_px is the finest level of the chosen series, and is no coarser
+  # than the working resolution this read was taken at.
+  info <- fq_info(vsi_path())
+  finest <- info$um_px[info$series == s@source$series & info$res == 1L][1]
+  expect_equal(s@source$native_um_px, finest)
+  expect_lte(s@source$native_um_px, s@um_per_px)
 })
