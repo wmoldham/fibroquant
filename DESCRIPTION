@@ -36,3 +36,5 @@ Imports:
     tibble,
     tools,
     withr
+URL: https://github.com/wmoldham/fibroquant
+BugReports: https://github.com/wmoldham/fibroquant/issues
