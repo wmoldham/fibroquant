@@ -65,6 +65,89 @@ fq_manifest <- function(
   )
 }
 
+# fq_results -------------------------------------------------------------------
+
+#' The result of a scoring run
+#'
+#' The object [fq_run()] returns: the per-section scores together with
+#' everything needed to redraw any section's severity map after the fact. It is
+#' a typed container over plain tibbles, so `@scores` stays a `dplyr`-able table
+#' for the downstream stats join while the run carries its fit and the recipe
+#' that produced it.
+#'
+#' Because the read-and-split path is deterministic, the run does not cache any
+#' pixels. The `fit` plus the split `params` and the slide `paths` are the
+#' closed set needed to replay a section and render its map. [fq_map()] does
+#' that replay in one call.
+#'
+#' @param scores A tibble with one row per section: `slide_id`, `section`, the
+#'   analyzer's metrics from [fq_score()], and the manifest's covariates.
+#' @param fit The fitted [fq_analyzer] the run scored with, for reuse or to
+#'   render maps. Typed to the [fq_analyzer] superclass so any analyzer fits.
+#' @param params The split recipe that produced the scored sections, a named
+#'   list with `n`, `close_um`, `min_area_frac`, and `target_um_px`.
+#' @param paths A two-column tibble mapping each `slide_id` to its `path`, so a
+#'   scored section can be replayed from its source file.
+#' @return An `fq_results` object.
+#' @seealso [fq_run()], [fq_map()]
+#' @export
+fq_results <-
+  S7::new_class(
+    "fq_results",
+    properties = list(
+      scores = S7::class_data.frame,
+      fit = fq_analyzer,
+      params = S7::class_list,
+      paths = S7::class_data.frame
+    ),
+    validator = function(self) {
+      recipe <- c("n", "close_um", "min_area_frac", "target_um_px")
+      missing_recipe <- setdiff(recipe, names(self@params))
+      if (length(missing_recipe) > 0L) {
+        return(
+          paste0(
+            "@params must carry the split recipe; missing: ",
+            paste(missing_recipe, collapse = ", ")
+          )
+        )
+      }
+      if (!all(c("slide_id", "path") %in% names(self@paths))) {
+        return("@paths must have columns `slide_id` and `path`")
+      }
+      NULL
+    }
+  )
+
+# A run's analyzer label for printing: the spec's class name (e.g. "fq_kmeans"),
+# falling back to the fit class with its "_analyzer" suffix stripped when a fit
+# carries no spec.
+# TODO: the no-spec fallback branch is untested while fq_kmeans_analyzer (which
+# always carries a spec) is the only analyzer. Add a test once an analyzer that
+# omits @spec lands (cpa/density/texture).
+.analyzer_label <- function(fit) {
+  spec <- tryCatch(fit@spec, error = function(e) NULL)
+  if (!is.null(spec)) {
+    S7::S7_class(spec)@name
+  } else {
+    sub("_analyzer$", "", S7::S7_class(fit)@name)
+  }
+}
+
+S7::method(print, fq_results) <- function(x, ...) {
+  n_sections <- nrow(x@scores)
+  n_slides <- nrow(x@paths)
+  cat(
+    sprintf(
+      "%d %s from %d %s \u00b7 %s \u00b7 %g \u00b5m/px\n",
+      n_sections, if (n_sections == 1L) "section" else "sections",
+      n_slides, if (n_slides == 1L) "slide" else "slides",
+      .analyzer_label(x@fit),
+      x@params$target_um_px
+    )
+  )
+  invisible(x)
+}
+
 # fq_run -----------------------------------------------------------------------
 
 #' Score a folder of slides against one analyzer
@@ -110,10 +193,15 @@ fq_manifest <- function(
 #'   reproducible basis. Scoring is deterministic and needs no seed.
 #' @param progress Show a progress bar that advances as each slide finishes, in
 #'   both sequential and parallel runs. `FALSE` suppresses it.
-#' @return A list with two elements. `scores` has one row per section, with
-#'   columns `slide_id`, `section` (the section label), the analyzer's metrics
-#'   from [fq_score()], and the manifest's covariates joined on. `fit` is the
-#'   fitted [fq_analyzer], for reuse or rendering.
+#' @return An [fq_results] object. Its `@scores` slot has one row per section,
+#'   with columns `slide_id`, `section` (the section label), the analyzer's
+#'   metrics from [fq_score()], and the manifest's covariates joined on. `@fit`
+#'   is the fitted [fq_analyzer], for reuse or rendering. `@params` is the split
+#'   recipe (`n`, `close_um`, `min_area_frac`, `target_um_px`) and `@paths` maps
+#'   each `slide_id` to its file. Together `@fit`, `@params`, and `@paths` are
+#'   everything [fq_map()] needs to redraw any section's severity map after the
+#'   run.
+#' @seealso [fq_map()]
 #' @export
 fq_run <- function(
     manifest,
@@ -249,13 +337,105 @@ fq_run <- function(
       by = "slide_id"
     )
 
-  list(
+  fq_results(
     scores = result,
-    fit = fit
+    fit = fit,
+    params = list(
+      n = n,
+      close_um = close_um,
+      min_area_frac = min_area_frac,
+      target_um_px = target_um_px
+    ),
+    paths = tibble::tibble(
+      slide_id = manifest$slide_id,
+      path = manifest$path
+    )
   )
 }
 
+# fq_map -----------------------------------------------------------------------
+
+#' Redraw a scored section's severity map after a run
+#'
+#' [fq_run()] keeps the scores and the fit, not the sections themselves, so a
+#' row in the scores table is not directly tied to its pixels. `fq_map()` closes
+#' that gap for post-hoc review: it replays [fq_read()] and [fq_split()] with
+#' the recipe the run recorded, then renders the section through the run's fit,
+#' returning a plottable [fq_field] in one call. Because the read-and-split path
+#' is deterministic, nothing is cached between runs; the map is recomputed on
+#' demand from the run's `@params` and `@paths`.
+#'
+#' `run[[slide_id, section]]` is shorthand for `fq_map(run, slide_id, section)`,
+#' and `run[[slide_id]]` for `fq_map(run, slide_id)`.
+#'
+#' @param run An [fq_results] from [fq_run()].
+#' @param slide_id A `slide_id` from `run@scores` (or `run@paths`).
+#' @param section A section label such as `"A"` or `"B"`, as it appears in the
+#'   `section` column of `run@scores`. `NULL` returns a named list of maps, one
+#'   per section of the slide.
+#' @return An [fq_field], or a named list of `fq_field`s when `section` is
+#'   `NULL`.
+#' @seealso [fq_run()], [fq_render()]
+#' @export
+fq_map <- function(run, slide_id, section = NULL) {
+  if (!S7::S7_inherits(run, fq_results)) {
+    stop("`run` must be an fq_results object from fq_run().", call. = FALSE)
+  }
+  if (is.null(section)) {
+    sections <- .fq_replay(run, slide_id)
+    maps <- lapply(sections, function(s) fq_render(run@fit, s))
+    names(maps) <- vapply(sections, function(s) s@section, character(1))
+    return(maps)
+  }
+  # Force the replay before dispatch. Passing it as a lazy argument into the
+  # fq_render generic lets S7 force the section promise mid-dispatch, turning a
+  # clean "not found" stop() into a re-entrant promise error.
+  sec <- .fq_replay(run, slide_id, section)
+  fq_render(run@fit, sec)
+}
+
+# run[["Image_3470", "A"]] and run[["Image_3470"]] delegate to fq_map(); the
+# terse idiom for interactive review lands on the same code path as the verb.
+S7::method(`[[`, fq_results) <- function(x, i, j, ...) {
+  if (missing(j)) fq_map(x, i) else fq_map(x, i, j)
+}
+
 # Internal helpers -------------------------------------------------------------
+
+# Replay read -> split -> pick for one slide of a run. The split is
+# deterministic, so this rebuilds the exact section(s) the run scored from the
+# recipe in @params. Returns the fq_sections collection when section is NULL,
+# otherwise the single matching fq_section.
+.fq_replay <- function(run, slide_id, section = NULL) {
+  i <- match(slide_id, run@paths$slide_id)
+  if (is.na(i)) {
+    stop("slide_id not found in run: ", slide_id, call. = FALSE)
+  }
+
+  p <- run@params
+  slide <- fq_read(run@paths$path[i], target_um_px = p$target_um_px)
+  sections <-
+    fq_split(
+      slide,
+      n = p$n,
+      close_um = p$close_um,
+      min_area_frac = p$min_area_frac
+    )
+  if (is.null(section)) {
+    return(sections)
+  }
+
+  labels <- vapply(sections, function(s) s@section, character(1))
+  j <- match(section, labels)
+  if (is.na(j)) {
+    stop(
+      "section '", section, "' not found for slide ", slide_id,
+      "; available: ", paste(labels, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  sections[[j]]
+}
 
 # Fit the analyzer on a representative subsample. Pick the reference slides,
 # read and split each, pool their first sections, and fit. The seed governs the

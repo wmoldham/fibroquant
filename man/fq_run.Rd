@@ -57,10 +57,14 @@ reproducible basis. Scoring is deterministic and needs no seed.}
 both sequential and parallel runs. \code{FALSE} suppresses it.}
 }
 \value{
-A list with two elements. \code{scores} has one row per section, with
-columns \code{slide_id}, \code{section} (the section label), the analyzer's metrics
-from \code{\link[=fq_score]{fq_score()}}, and the manifest's covariates joined on. \code{fit} is the
-fitted \link{fq_analyzer}, for reuse or rendering.
+An \link{fq_results} object. Its \verb{@scores} slot has one row per section,
+with columns \code{slide_id}, \code{section} (the section label), the analyzer's
+metrics from \code{\link[=fq_score]{fq_score()}}, and the manifest's covariates joined on. \verb{@fit}
+is the fitted \link{fq_analyzer}, for reuse or rendering. \verb{@params} is the split
+recipe (\code{n}, \code{close_um}, \code{min_area_frac}, \code{target_um_px}) and \verb{@paths} maps
+each \code{slide_id} to its file. Together \verb{@fit}, \verb{@params}, and \verb{@paths} are
+everything \code{\link[=fq_map]{fq_map()}} needs to redraw any section's severity map after the
+run.
 }
 \description{
 Runs the full pipeline over a manifest. It fits the analyzer once on a
@@ -76,4 +80,7 @@ in your session and the work for each slide runs across those daemons. With
 no daemons set it runs sequentially. A parallel run needs the package
 installed with \verb{R CMD INSTALL}, because each daemon loads \code{fibroquant} to
 score.
+}
+\seealso{
+\code{\link[=fq_map]{fq_map()}}
 }

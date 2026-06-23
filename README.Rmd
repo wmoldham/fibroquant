@@ -16,10 +16,11 @@ knitr::opts_chunk$set(
 ```{r real-setup, include = FALSE}
 library(fibroquant)
 
-# The figures below are knit from a local slide. Point this at any .vsi to
-# rebuild them; chunks are skipped when the file is absent.
-vsi <- "/run/media/will/Will/Mouse lung 6.10.26/Image_3470.vsi"
-has_vsi <- file.exists(vsi)
+# The figures below are knit from a local slide. The .Rprofile sets
+# FIBROQUANT_TEST_VSI to an OS-specific slide path; point it at any .vsi to
+# rebuild them. Chunks are skipped when the file is absent.
+vsi <- Sys.getenv("FIBROQUANT_TEST_VSI")
+has_vsi <- nzchar(vsi) && file.exists(vsi)
 ```
 
 # fibroquant
@@ -227,12 +228,22 @@ of injury.
 
 ```{r batch-run, eval = has_vsi}
 result <- fq_run(manifest, fq_kmeans(k = 3), progress = FALSE)
-result$scores
+result@scores
 ```
 
-The returned `fit` is all you need to regenerate a severity map for any section
-later, without refitting: read and split a slide, then call
-`fq_render(result$fit, section)` and `plot()` the field.
+The result also carries everything needed to redraw any section's severity map
+after the fact, without refitting. `fq_map()` replays the read-and-split from the
+recipe the run recorded and renders the section through the run's fit, returning
+a plottable field in one call:
+
+```{r batch-map, eval = has_vsi, fig.show = "hold"}
+plot(fq_map(result, "Image_3470", "A"))
+
+# `[[` is the terse shorthand for the same thing:
+#   result[["Image_3470", "A"]]
+# Drop the section to get every section of a slide, as a named list of maps.
+maps <- fq_map(result, "Image_3470")
+```
 
 Parallelism is optional and controlled by the caller. Set `mirai::daemons(n)` in
 your session and the work for each slide runs across those daemons; with none set

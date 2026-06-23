@@ -206,11 +206,11 @@ centres and that ordering.
 fit <- fq_fit(spec, sections)
 fit@centers   # one row per grade, in a*b* space
 #>          a         b
-#> 2 23.68853 -16.51127
-#> 1 31.98723 -21.89050
-#> 3 48.18225 -26.16769
+#> 3 23.67767 -16.50789
+#> 1 32.01626 -21.90740
+#> 2 48.24739 -26.15657
 fit@luminance # mean L* per grade, mildest to most severe
-#> [1] 69.98048 66.84082 64.26826
+#> [1] 69.98247 66.83175 64.28933
 ```
 
 **Scoring.** `fq_score()` applies the basis to one section and measures
@@ -252,12 +252,12 @@ manifest <-
 manifest$treatment <- c("saline", "saline", "bleo", "bleo")
 manifest
 #> # A tibble: 4 × 3
-#>   slide_id   path                                                   treatment
-#>   <chr>      <chr>                                                  <chr>    
-#> 1 Image_3470 /run/media/will/Will/Mouse lung 6.10.26/Image_3470.vsi saline   
-#> 2 Image_3472 /run/media/will/Will/Mouse lung 6.10.26/Image_3472.vsi saline   
-#> 3 Image_3473 /run/media/will/Will/Mouse lung 6.10.26/Image_3473.vsi bleo     
-#> 4 Image_3474 /run/media/will/Will/Mouse lung 6.10.26/Image_3474.vsi bleo
+#>   slide_id   path                                            treatment
+#>   <chr>      <chr>                                           <chr>    
+#> 1 Image_3470 /Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi saline   
+#> 2 Image_3472 /Volumes/Will/Mouse lung 6.10.26/Image_3472.vsi saline   
+#> 3 Image_3473 /Volumes/Will/Mouse lung 6.10.26/Image_3473.vsi bleo     
+#> 4 Image_3474 /Volumes/Will/Mouse lung 6.10.26/Image_3474.vsi bleo
 ```
 
 `fq_run()` fits the analyzer once on a representative subsample of the
@@ -269,7 +269,7 @@ to spread that budget across a covariate, for example
 
 ``` r
 result <- fq_run(manifest, fq_kmeans(k = 3), progress = FALSE)
-result$scores
+result@scores
 #> # A tibble: 8 × 7
 #>   slide_id   section severity_index frac_sev_1 frac_sev_2 frac_sev_3 treatment
 #>   <chr>      <chr>            <dbl>      <dbl>      <dbl>      <dbl> <chr>    
@@ -283,9 +283,21 @@ result$scores
 #> 8 Image_3474 B                 4.75      0.241      0.567      0.192 bleo
 ```
 
-The returned `fit` is all you need to regenerate a severity map for any
-section later, without refitting: read and split a slide, then call
-`fq_render(result$fit, section)` and `plot()` the field.
+The result also carries everything needed to redraw any section’s
+severity map after the fact, without refitting. `fq_map()` replays the
+read-and-split from the recipe the run recorded and renders the section
+through the run’s fit, returning a plottable field in one call:
+
+``` r
+plot(fq_map(result, "Image_3470", "A"))
+
+# `[[` is the terse shorthand for the same thing:
+#   result[["Image_3470", "A"]]
+# Drop the section to get every section of a slide, as a named list of maps.
+maps <- fq_map(result, "Image_3470")
+```
+
+<img src="man/figures/README-batch-map-1.png" alt="" width="100%" />
 
 Parallelism is optional and controlled by the caller. Set
 `mirai::daemons(n)` in your session and the work for each slide runs
