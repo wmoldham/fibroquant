@@ -80,10 +80,10 @@ S7::method(plot, fq_sections) <- function(x, ...) {
 }
 
 # Map a severity field to an H x W x 3 RGB array. Each grade takes a colour
-# along a blue to orange to red ramp. Pixels off tissue are white.
+# interpolated along the field's palette. Pixels off tissue are white.
 .pseudocolor <- function(field) {
   values <- field@values
-  pal <- grDevices::colorRampPalette(c("#1F74E0", "#F2891C", "#BE1622"))
+  pal <- grDevices::colorRampPalette(field@palette)
   grade_rgb <- t(grDevices::col2rgb(pal(field@k)) / 255)
   out <- array(1, dim = c(dim(values), 3))
   tissue <- !is.na(values)

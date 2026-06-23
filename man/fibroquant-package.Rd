@@ -8,6 +8,14 @@
 \description{
 Provides tools for quantifying the severity of tissue fibrosis from stained histological sections (for example, Masson's trichrome or haematoxylin and eosin). A common image-processing front end feeds interchangeable scoring methods through a shared interface, so that different quantification approaches can be applied and compared. The methods are unsupervised and intended for high-throughput analysis of large image sets with minimal user input.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/wmoldham/fibroquant}
+  \item Report bugs at \url{https://github.com/wmoldham/fibroquant/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: William Oldham \email{wm.oldham@gmail.com} (\href{https://orcid.org/0000-0003-3029-4866}{ORCID})
 

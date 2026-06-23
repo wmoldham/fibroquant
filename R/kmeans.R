@@ -95,6 +95,9 @@ fq_kmeans_analyzer <-
 #' @param values Numeric H x W grid of severity grades (1 to `k`), `NA` off
 #'   tissue.
 #' @param k Number of severity grades.
+#' @param palette Colours for grades 1 to `k`, interpolated into the
+#'   pseudocolour ramp. Defaults to a blue-orange-red severity ramp. An analyzer
+#'   can pass its own, such as a sequential blue scale for collagen density.
 #' @return An `fq_field` object.
 #' @export
 fq_field <-
@@ -102,8 +105,19 @@ fq_field <-
     "fq_field",
     properties = list(
       values = S7::class_numeric,
-      k = S7::class_integer
-    )
+      k = S7::class_integer,
+      palette = S7::class_character
+    ),
+    constructor = function(values = numeric(0),
+                           k = 0L,
+                           palette = c("#1F74E0", "#F2891C", "#BE1622")) {
+      S7::new_object(
+        S7::S7_object(),
+        values = values,
+        k = k,
+        palette = palette
+      )
+    }
   )
 
 # Internal helpers -------------------------------------------------------------

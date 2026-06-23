@@ -100,6 +100,21 @@ fq_results <-
       params = S7::class_list,
       paths = S7::class_data.frame
     ),
+    # An explicit constructor keeps the data.frame defaults as plain
+    # `data.frame()` rather than S7's auto-generated prototype, which deparses
+    # with whitespace that R CMD check codoc flags as a doc mismatch.
+    constructor = function(scores = data.frame(),
+                           fit,
+                           params = list(),
+                           paths = data.frame()) {
+      S7::new_object(
+        S7::S7_object(),
+        scores = scores,
+        fit = fit,
+        params = params,
+        paths = paths
+      )
+    },
     validator = function(self) {
       recipe <- c("n", "close_um", "min_area_frac", "target_um_px")
       missing_recipe <- setdiff(recipe, names(self@params))

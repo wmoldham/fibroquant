@@ -5,3 +5,6 @@
 .DS_Store
 .quarto
 .Renviron
+
+# dev/ scratch: local only, holds experimental data, preserved via Dropbox
+dev/

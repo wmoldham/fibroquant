@@ -4,13 +4,21 @@
 \alias{fq_field}
 \title{Per-pixel severity field}
 \usage{
-fq_field(values = integer(0), k = integer(0))
+fq_field(
+  values = numeric(0),
+  k = 0L,
+  palette = c("#1F74E0", "#F2891C", "#BE1622")
+)
 }
 \arguments{
 \item{values}{Numeric H x W grid of severity grades (1 to \code{k}), \code{NA} off
 tissue.}
 
 \item{k}{Number of severity grades.}
+
+\item{palette}{Colours for grades 1 to \code{k}, interpolated into the pseudocolour
+ramp. Defaults to a blue-orange-red severity ramp. An analyzer can pass its
+own, for example a sequential blue scale for collagen density.}
 }
 \value{
 An \code{fq_field} object.

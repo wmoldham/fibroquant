@@ -21,6 +21,11 @@ library(fibroquant)
 # rebuild them. Chunks are skipped when the file is absent.
 vsi <- Sys.getenv("FIBROQUANT_TEST_VSI")
 has_vsi <- nzchar(vsi) && file.exists(vsi)
+
+# The collagen analyzer needs a Masson's trichrome scan; by convention these sit
+# beside the H&E scan as <name>_01.vsi.
+vsi_mt <- sub("\\.vsi$", "_01.vsi", vsi)
+has_vsi_mt <- has_vsi && file.exists(vsi_mt)
 ```
 
 # fibroquant
@@ -200,6 +205,72 @@ fq_score(fit, sec)
 ```{r kmeans-render, eval = has_vsi}
 field <- fq_render(fit, sec)
 plot(field)
+```
+
+### Collagen analyzer
+
+The second analyzer measures Collagen Proportionate Area, the fraction of tissue
+stained for collagen. It works on Masson's trichrome, where collagen is blue and
+the counterstain is red. It does not work on H&E, which does not separate
+collagen by colour, so this analyzer is gated to trichrome.
+
+The trichrome dyes overlap in colour, so thresholding blue off the RGB image is
+unreliable. The analyzer separates the stains by colour deconvolution. It
+converts each pixel to optical density and applies the inverse of a stain matrix,
+giving one density channel per dye. The stain matrix is not fixed. It is
+estimated from the batch by the Macenko method, so it adapts to each staining
+run.
+
+The collagen channel is then thresholded and its area taken as a fraction of
+tissue. The threshold is a strict quantile of the collagen density, learned on
+the batch. Collagen in lung is a continuum of densities, not two separable
+populations. A loose threshold counts the faint collagen in every alveolar wall,
+which is present in healthy tissue. A strict threshold isolates the dense,
+pathological deposition. On a bleomycin series the default quantile of 0.98
+separated injury from control where looser rules did not.
+
+**The spec.** `fq_collagen()` is the recipe: the stain-estimation settings and
+the collagen quantile. It holds no fitted state.
+
+```{r collagen-spec, eval = has_vsi_mt}
+spec <- fq_collagen(collagen_quantile = 0.98)
+spec
+```
+
+**Fitting the basis.** `fq_fit()` reads a batch of trichrome sections, pools
+their masked pixels, estimates the stain matrix, and sets the collagen threshold
+from the pooled density. The fit carries the stain matrix and that threshold.
+
+```{r collagen-fit, eval = has_vsi_mt}
+mt_sections <- fq_split(fq_read(vsi_mt, target_um_px = 4), n = 2)
+cfit <- fq_fit(spec, mt_sections)
+cfit@stain_matrix
+cfit@threshold
+```
+
+**Scoring.** `fq_score()` deconvolves one section, measures the tissue above the
+collagen threshold, and returns CPA as the `severity_index`. Collagen scores
+stack into the same table as any other analyzer.
+
+```{r collagen-score, eval = has_vsi_mt}
+fq_score(cfit, mt_sections[[1]])
+```
+
+**Mapping.** `fq_render()` returns an `fq_field` to plot. Pass `density = TRUE`
+to see the collagen channel itself, the deconvolved blue signal. White is clear
+tissue and deeper blue is denser collagen, so it reads like the blue stain with
+the pink removed.
+
+```{r collagen-channel, eval = has_vsi_mt}
+plot(fq_render(cfit, mt_sections[[1]], density = TRUE))
+```
+
+The default view is the collagen mask, the pixels CPA counts. Collagen is red
+against blue tissue. Both confirm the deconvolution finds collagen where it
+belongs, around the airways and vessels.
+
+```{r collagen-render, eval = has_vsi_mt}
+plot(fq_render(cfit, mt_sections[[1]]))
 ```
 
 ## Batch processing

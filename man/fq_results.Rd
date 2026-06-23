@@ -4,38 +4,7 @@
 \alias{fq_results}
 \title{The result of a scoring run}
 \usage{
-fq_results(
-  scores = (function (.data = list(), row.names = NULL) 
- {
-     if (is.null(row.names))
-    {
-         list2DF(.data)
-     }
-     else {
-         out <- list2DF(.data,
-    length(row.names))
-         attr(out, "row.names") <- row.names
-         out
-     }
-
-    })(),
-  fit = fq_analyzer(),
-  params = list(),
-  paths = (function (.data = list(), row.names = NULL) 
- {
-     if (is.null(row.names))
-    {
-         list2DF(.data)
-     }
-     else {
-         out <- list2DF(.data,
-    length(row.names))
-         attr(out, "row.names") <- row.names
-         out
-     }
-
-    })()
-)
+fq_results(scores = data.frame(), fit, params = list(), paths = data.frame())
 }
 \arguments{
 \item{scores}{A tibble with one row per section: \code{slide_id}, \code{section}, the
