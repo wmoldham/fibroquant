@@ -214,7 +214,7 @@ results.
 manifest <-
   fq_manifest(dirname(vsi)) |>
   dplyr::filter(!grepl("_01", slide_id)) |>
-  dplyr::slice_head(n = 4)
+  dplyr::filter(stringr::str_detect(slide_id, "3470|3472|3478|3479"))
 manifest$treatment <- c("saline", "saline", "bleo", "bleo")
 manifest
 ```
@@ -237,7 +237,7 @@ recipe the run recorded and renders the section through the run's fit, returning
 a plottable field in one call:
 
 ```{r batch-map, eval = has_vsi, fig.show = "hold"}
-plot(fq_map(result, "Image_3470", "A"))
+plot(fq_map(result, "Image_3478", "A"))
 
 # `[[` is the terse shorthand for the same thing:
 #   result[["Image_3470", "A"]]

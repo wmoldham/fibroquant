@@ -206,11 +206,11 @@ centres and that ordering.
 fit <- fq_fit(spec, sections)
 fit@centers   # one row per grade, in a*b* space
 #>          a         b
-#> 3 23.67767 -16.50789
-#> 1 32.01626 -21.90740
-#> 2 48.24739 -26.15657
+#> 3 23.66581 -16.49723
+#> 1 31.99283 -21.90516
+#> 2 48.22846 -26.12191
 fit@luminance # mean L* per grade, mildest to most severe
-#> [1] 69.98247 66.83175 64.28933
+#> [1] 69.98785 66.81713 64.30294
 ```
 
 **Scoring.** `fq_score()` applies the basis to one section and measures
@@ -222,7 +222,7 @@ fq_score(fit, sec)
 #> # A tibble: 1 × 4
 #>   severity_index frac_sev_1 frac_sev_2 frac_sev_3
 #>            <dbl>      <dbl>      <dbl>      <dbl>
-#> 1           3.80      0.420      0.400      0.180
+#> 1           3.80      0.419      0.401      0.180
 ```
 
 **Mapping.** `fq_render()` labels each tissue pixel with its grade and
@@ -248,7 +248,7 @@ they ride through to the results.
 manifest <-
   fq_manifest(dirname(vsi)) |>
   dplyr::filter(!grepl("_01", slide_id)) |>
-  dplyr::slice_head(n = 4)
+  dplyr::filter(stringr::str_detect(slide_id, "3470|3472|3478|3479"))
 manifest$treatment <- c("saline", "saline", "bleo", "bleo")
 manifest
 #> # A tibble: 4 × 3
@@ -256,8 +256,8 @@ manifest
 #>   <chr>      <chr>                                           <chr>    
 #> 1 Image_3470 /Volumes/Will/Mouse lung 6.10.26/Image_3470.vsi saline   
 #> 2 Image_3472 /Volumes/Will/Mouse lung 6.10.26/Image_3472.vsi saline   
-#> 3 Image_3473 /Volumes/Will/Mouse lung 6.10.26/Image_3473.vsi bleo     
-#> 4 Image_3474 /Volumes/Will/Mouse lung 6.10.26/Image_3474.vsi bleo
+#> 3 Image_3478 /Volumes/Will/Mouse lung 6.10.26/Image_3478.vsi bleo     
+#> 4 Image_3479 /Volumes/Will/Mouse lung 6.10.26/Image_3479.vsi bleo
 ```
 
 `fq_run()` fits the analyzer once on a representative subsample of the
@@ -273,14 +273,14 @@ result@scores
 #> # A tibble: 8 × 7
 #>   slide_id   section severity_index frac_sev_1 frac_sev_2 frac_sev_3 treatment
 #>   <chr>      <chr>            <dbl>      <dbl>      <dbl>      <dbl> <chr>    
-#> 1 Image_3470 A                 4.21      0.352      0.455      0.193 saline   
-#> 2 Image_3470 B                 4.55      0.296      0.499      0.205 saline   
-#> 3 Image_3472 A                 2.93      0.534      0.347      0.119 saline   
-#> 4 Image_3472 B                 3.30      0.456      0.427      0.117 saline   
-#> 5 Image_3473 A                 3.83      0.412      0.409      0.179 bleo     
-#> 6 Image_3473 B                 3.72      0.438      0.380      0.182 bleo     
-#> 7 Image_3474 A                 4.26      0.324      0.500      0.176 bleo     
-#> 8 Image_3474 B                 4.75      0.241      0.567      0.192 bleo
+#> 1 Image_3470 A                 4.22      0.367      0.424      0.210 saline   
+#> 2 Image_3470 B                 4.59      0.310      0.463      0.227 saline   
+#> 3 Image_3472 A                 2.90      0.549      0.322      0.129 saline   
+#> 4 Image_3472 B                 3.29      0.470      0.401      0.129 saline   
+#> 5 Image_3478 A                 4.97      0.315      0.375      0.309 bleo     
+#> 6 Image_3478 B                 4.88      0.320      0.383      0.297 bleo     
+#> 7 Image_3479 A                 5.84      0.195      0.442      0.363 bleo     
+#> 8 Image_3479 B                 5.88      0.190      0.444      0.366 bleo
 ```
 
 The result also carries everything needed to redraw any section’s
@@ -289,7 +289,7 @@ read-and-split from the recipe the run recorded and renders the section
 through the run’s fit, returning a plottable field in one call:
 
 ``` r
-plot(fq_map(result, "Image_3470", "A"))
+plot(fq_map(result, "Image_3478", "A"))
 
 # `[[` is the terse shorthand for the same thing:
 #   result[["Image_3470", "A"]]
